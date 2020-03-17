@@ -1,0 +1,6 @@
+This is a method to start a github repository without visiting the site at all
+curl -u 'nishishailesh' https://api.github.com/user/repos -d "{\"name\":\"elitepro_astm\"}"
+git init
+git add *
+git commit
+git push .....

@@ -1,0 +1,12 @@
+This file contain random note I need to remember for software testing and validation
+
+I can use following for testing tcp interface
+	socat -x file:text tcp:127.0.0.1:11111
+	socat -x - tcp:127.0.0.1:11111
+
+-x help in hex outout, so nonprinting character are seen when they are returned by server
+
+For testing tty interface following is useful
+socat -d -d - pty,raw,echo=0
+input_tty='/dev/pts/2'
+(Read output of socat to find exact pty
