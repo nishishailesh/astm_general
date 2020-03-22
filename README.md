@@ -1,7 +1,7 @@
 ### About
 If you wish **unidirectional communication** with medical equipment using **ASTM protocol** this might be useful
 
-It handles both RS232 (COM Port, ttyS0 etc ) and TCP connections wia LAN/wifi
+It handles both RS232 (COM Port, ttyS0 etc ) and TCP connections via LAN/wifi
 
 It is tested with
 
