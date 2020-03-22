@@ -8,6 +8,7 @@ It is tested with
 	Erba biochemistry analysers (XL-640)
 	Note: Erba XL-640 with Windows-XP have problem with resources. Use Windows 7 or above
 	ElitePro Coagulation analyser
+	It must work with any analyser following ASTM protocol
 
 ### prerequisites
   * Linux ( Tested in debian, but must work with any)
