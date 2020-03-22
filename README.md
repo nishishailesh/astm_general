@@ -25,11 +25,20 @@ It is tested with
     * to specify folder for saving data files
     * to specify file where log will be stored
   * make file executable
-  '''
+  ```
   chmod +x astm_general.py
-  '''
-
-What Next
-	You need to write own program to read files saved
-	The data may be inserted in database
-<code>
+  ```
+  * run script
+  * use inotifywait to see files being created
+  * see log file for error
+  
+#####What Next
+  * create service to run at boot time (I am planning to add its example)
+  * create mysql support for database insertion
+  * program for bidirectional service
+  
+#####Contact
+  * Dr Shaileshkumar Manubhai Patel
+  * biochemistrygmcs@gmail.com
+  * WhatsApp: 9664555812 (India)
+	
