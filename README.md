@@ -17,7 +17,7 @@ It is tested with
   * Most libraries are deault installation with python in Linux
   * See log file for missing libraries
   
-##### This project have astm_general.py file as sole code
+### This project have astm_general.py file as sole code
   * The program simply sends ACK on receipt of ENQ and LF from equipment
   * The data received (from ENQ to EOT ) is saved in a file (see below)
   * It is up to user to decide what to do with this data (e.g. database interfacing)  
@@ -35,12 +35,12 @@ It is tested with
   * use inotifywait to see files being created
   * see log file for error
   
-#####What Next
+### What Next
   * create service to run at boot time (I am planning to add its example)
   * create mysql support for database insertion
   * program for bidirectional service
   
-#####Contact
+### Contact
   * Dr Shaileshkumar Manubhai Patel
   * biochemistrygmcs@gmail.com
   * WhatsApp: 9664555812 (India)
