@@ -13,7 +13,9 @@ It is tested with
 ### prerequisites
   * Linux ( Tested in debian, but must work with any)
   * Python3 +
-  * Some python 3 libraries like time,datetime,socket,serial
+  * Some python 3 libraries like sys,logging, signal time,datetime,socket,serial
+  * Most libraries are deault installation with python in Linux
+  * See log file for missing libraries
   
 ##### This project have astm_general.py file as sole code
   * The program simply sends ACK on receipt of ENQ and LF from equipment
