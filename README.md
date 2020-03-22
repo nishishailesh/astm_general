@@ -1,3 +1,10 @@
+### About
+If you wish **unidirectional communication** with medical equipment using **ASTM protocol** this might be useful
+It handles both RS232 (COM Port, ttyS0 etc ) and TCP connections wia LAN/wifi
+### prerequisites
+  * Linux ( Tested in debian, but must work with any
+  * Python3 +
+  * Some python 3 libraries like time,datetime,socket,serial
 # This project have astm_general.py file
 It can do unidirectional communication with equipments using ASTM protocol (Many Medical Equipments)
 It is tested with
