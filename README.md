@@ -1,4 +1,4 @@
-This project have astm_general.py file
+<code>This project have astm_general.py file
 It can do unidirectional communication with equipments using ASTM protocol (Many Medical Equipments)
 It is tested with
 	Erba biochemistry analysers (XL-640)
@@ -15,3 +15,4 @@ The program simply sends ACK on receipt of ENQ and LF from equipment
 What Next
 	You need to write own program to read files saved
 	The data may be inserted in database
+<code>
