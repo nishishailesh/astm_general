@@ -3,15 +3,23 @@ import sys
 
 #defaults###############
 
-#tty#uncoment as needed
+############################
+##########Start of (tty vs tcp)######
+############################
+
+#tty -> uncoment as needed
 #connection_type='tty'
 #input_tty='/dev/ttyS2'
 
-#tcp#uncomment as needed
+#tcp ->uncomment as needed
 connection_type='tcp'
-#host_address='12.207.3.230'
-host_address='127.0.0.1'
+host_address='11.207.1.1'
 host_port='11111'
+
+############################
+##########END of (tty vs tcp)######
+############################
+
 s=None
 x=None
 logfile_name='/var/log/astm_general.log'
@@ -120,8 +128,8 @@ def get_port():
     logging.debug(s)    
  
     logging.debug('Waiting for connection from a client....')   
-    conn_tuple = s.accept()
-    
+    conn_tuple = s.accept()	#This waits till connected
+   
     logging.debug('Client request received. Listening+ Accepting Socket (conn_tuple) details below:')
     logging.debug(conn_tuple)
     
@@ -150,9 +158,16 @@ while True:
   byte=my_read(port)
   if(byte==b''):
     logging.debug('<EOF> reached. Connection broken: details below')
-    logging.debug('(Broken) Listening Socket (s) details below:')
-    logging.debug(s)
-    port=get_port()
+    #<EOF> never reached with tty unless the device is not existing)
+    if(connection_type=='tcp'):
+      logging.debug('(Broken) Listening Socket (s) details below:')
+      logging.debug(s)
+      logging.debug('(From While)Waiting for connection from a client....') 
+      conn_tuple = s.accept()	#This waits till connected
+      logging.debug('(From While) Client request received. Listening+ Accepting Socket (conn_tuple) details below:')
+      logging.debug(conn_tuple)
+      port=conn_tuple[0]
+    
   else:
     byte_array=byte_array+[chr(ord(byte))]	#add everything read to array, if not EOF. EOF have no ord
     logging.debug(ord(byte))
