@@ -15,14 +15,19 @@ It is tested with
   * Some python 3 libraries like time,datetime,socket,serial
   
 ##### This project have astm_general.py file as sole code
-
-It can be used for both rs232 and TCP communication
-	manual edit of file required to select the mode
-It will save data sent by equipment in to a file in specified folder
-	manual edit of file to sepecify folder and log location
-It is up to user to decide what to do with this data (datbase interfacing)
-The file will contain everything between ENQ and EOT
-The program simply sends ACK on receipt of ENQ and LF from equipment
+  * The program simply sends ACK on receipt of ENQ and LF from equipment
+  * The data received (from ENQ to EOT ) is saved in a file (see below)
+  * It is up to user to decide what to do with this data (e.g. database interfacing)  
+  * manual edit of file required for following
+    * to select the mode (tty or tcp)
+    * to select tty device (if tty mode)
+    * to select ip and port (if tcp mode)
+    * to specify folder for saving data files
+    * to specify file where log will be stored
+  * make file executable
+  '''
+  chmod +x astm_general.py
+  '''
 
 What Next
 	You need to write own program to read files saved
