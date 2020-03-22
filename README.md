@@ -1,4 +1,4 @@
-#This project have astm_general.py file
+#This project have astm_general.py file#
 It can do unidirectional communication with equipments using ASTM protocol (Many Medical Equipments)
 It is tested with
 	Erba biochemistry analysers (XL-640)
