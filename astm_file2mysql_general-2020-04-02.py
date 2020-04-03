@@ -61,12 +61,6 @@ class astm_file(object):
     self.current_file=''
     self.wait_for=''
     self.previous_byte=''
-    self.next_frame_number=1	#First frame after ENQ-STX is always 1 (not 0)
-    self.next_char_chksum_1=False
-    self.next_char_chksum_1=True
-    self.file_chksum=''
-    self.checksum=0
-    
     self.stx=b'\x02'
     self.etx=b'\x03'
     self.eot=b'\x04'
@@ -90,7 +84,6 @@ class astm_file(object):
     fh=open(self.inbox+self.current_file,'rb')
     msg='File full path is: '+self.inbox+self.current_file
     logging.debug(msg)
-    
     while True:
       data=fh.read(1)
       #logging.debug(data)
@@ -101,7 +94,7 @@ class astm_file(object):
         
       elif data==b'\x02':
         self.manage_stx(data)
-          
+        
       elif data==b'\x0d':
         self.manage_cr(data)
         
@@ -110,15 +103,9 @@ class astm_file(object):
         
       elif data==b'\x17':
         self.manage_etb(data)
-        two_digit_checksum_string='{chksum:X}'.format(chksum=self.checksum).zfill(2)
-        logging.debug('checksum='+two_digit_checksum_string)
-        self.next_char_chksum_1=True
         
       elif data==b'\x03':
         self.manage_etx(data)
-        two_digit_checksum_string='{chksum:X}'.format(chksum=self.checksum).zfill(2)
-        logging.debug('checksum='+two_digit_checksum_string)
-        self.next_char_chksum_1=True    
         
       elif data==b'\x05':
         self.manage_enq(data)
@@ -131,6 +118,7 @@ class astm_file(object):
         
       self.previous_byte=data
 
+
   def manage_ack(self,data):
     logging.debug('ACK')
 
@@ -140,22 +128,18 @@ class astm_file(object):
       msg='Received :STX after ENQ. Wait for Frame number'
       logging.debug(msg)
     self.wait_for=''
-    self.checksum=0
     
   def manage_cr(self,data):
     logging.debug('CR')
-    self.checksum=(self.checksum+ord(data))%256
 
   def manage_lf(self,data):
     logging.debug('LF')
 
   def manage_etb(self,data):
     logging.debug('ETB')
-    self.checksum=(self.checksum+ord(data))%256
 
   def manage_etx(self,data):
     logging.debug('ETX')
-    self.checksum=(self.checksum+ord(data))%256
 
   def manage_enq(self,data):
     logging.debug('ENQ')
@@ -167,50 +151,18 @@ class astm_file(object):
     logging.debug('EOT')
 
   def manage_other(self,data):
-
     logging.debug(data)
-    
-    #verfy frame number
     if(self.previous_byte==self.stx):
       if chr(ord(data)).isnumeric()==True :
         msg='Number found, it is a frame number:'+ chr(ord(data))
         logging.debug(msg)
-        if(self.next_frame_number==int(data)):
-          msg='Expected frame number :'+ chr(ord(data)) + ' is correct'
-          logging.debug(msg)
-          self.next_frame_number=self.next_frame_number+1
-          if self.next_frame_number>7 :
-            self.next_frame_number=0
-        else:
-          msg='Un-Expected frame number ??:'+ chr(ord(data) + ' >> Expected '+ self.next_frame_number )
-          logging.debug(msg)
-    
-    #verify checksum or calculate it
-    if self.next_char_chksum_1 ==True:
-      self.file_chksum=self.file_chksum + chr(ord(data))
-      self.next_char_chksum_1=False
-      self.next_char_chksum_2=True
-    elif self.next_char_chksum_2 ==True:
-      self.file_chksum=self.file_chksum + chr(ord(data))
-      self.next_char_chksum_2=False
-      two_digit_checksum_string='{chksum:X}'.format(chksum=self.checksum).zfill(2)  
+      #else:
+      #  msg='Number not found???:'+ chr(ord(data))
+      #  logging.debug(msg)
+    #else:
+    #  msg='Previous byte not STX??:'+ chr(ord(data) + ord(self.stx) )
+    #  logging.debug(msg)
       
-      #two_digit_file_checksum_string=''.join(self.file_chksum)              
-      two_digit_file_checksum_string=self.file_chksum
-      
-      if two_digit_file_checksum_string==two_digit_checksum_string:
-        msg='Checksum matched'
-      else:
-        msg='Checksum not matched'+str(self.file_chksum) +'<>'+ two_digit_checksum_string
-      logging.debug(msg)  
-      self.file_chksum='' 
-    else:    
-      self.checksum=(self.checksum+ord(data))%256
-      #checksum include everything after stx(not stx) including/upto ETB/ETX 
-      #ETX,ETB,CR taken care of in its function
-      
-    
-       
   def send_to_mysql(self):
     #sql='insert into primary_result_blob (sample_id,examination_id,result,uniq) values (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE result=%s'
     #data_tpl=(self.abx_result[30].rstrip(' '),key,self.abx_result[key],self.abx_result[26],self.abx_result[key])
