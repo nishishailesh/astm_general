@@ -1,0 +1,346 @@
+1H|\^&|||ACL9000-01|||||||P|1|202003131545431E
+2P|1|||||||U||||||||||||||||||||||||||90
+3O|1|2012981||^^^0013|||||||||||^|||||||||||F||||||2C
+4R|1|^^^0013|11.700|s||||F||||20200313153618|94
+5C|1|I|73^Warning: Sample sensor off|IAA
+6C|2|I|74^Warning: Reagent sensor off|I11
+7R|2|^^^0013|0.975|R||||F||||20200313153618|53
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|3|^^^0013|0.975|INR||||F||||20200313153618|E6
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|4|^^^0013||%||||F||||20200313153618|23
+6C|1|I|301^Result out of Test Range|IE7
+7C|2|I|73^Warning: Sample sensor off|IAD
+0C|3|I|74^Warning: Reagent sensor off|I0C
+1O|2|2012981||^^^0092|||||||||||^|||||||||||F||||||32
+2R|1|^^^0092|59.400|s||||F||||20200313153618|A2
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|2|^^^0092|1.856|R||||F||||20200313153618|57
+6C|1|I|73^Warning: Sample sensor off|IAB
+7C|2|I|74^Warning: Reagent sensor off|I12
+0P|2|||||||U||||||||||||||||||||||||||8F
+1O|1|2012980||^^^0013|||||||||||^|||||||||||F||||||29
+2R|1|^^^0013|11.700|s||||F||||20200313153618|92
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|2|^^^0013|0.975|R||||F||||20200313153618|51
+6C|1|I|73^Warning: Sample sensor off|IAB
+7C|2|I|74^Warning: Reagent sensor off|I12
+0R|3|^^^0013|0.975|INR||||F||||20200313153618|E4
+1C|1|I|73^Warning: Sample sensor off|IA6
+2C|2|I|74^Warning: Reagent sensor off|I0D
+3R|4|^^^0013||%||||F||||20200313153618|21
+4C|1|I|301^Result out of Test Range|IE5
+5C|2|I|73^Warning: Sample sensor off|IAB
+6C|3|I|74^Warning: Reagent sensor off|I12
+7P|3|||||||U||||||||||||||||||||||||||97
+0O|1|2012979||^^^0013|||||||||||^|||||||||||F||||||30
+1R|1|^^^0013|11.800|s||||F||||20200313153618|92
+2C|1|I|73^Warning: Sample sensor off|IA7
+3C|2|I|74^Warning: Reagent sensor off|I0E
+4R|2|^^^0013|0.983|R||||F||||20200313153618|4F
+5C|1|I|73^Warning: Sample sensor off|IAA
+6C|2|I|74^Warning: Reagent sensor off|I11
+7R|3|^^^0013|0.983|INR||||F||||20200313153618|EA
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|4|^^^0013||%||||F||||20200313153618|20
+3C|1|I|301^Result out of Test Range|IE4
+4C|2|I|73^Warning: Sample sensor off|IAA
+5C|3|I|74^Warning: Reagent sensor off|I11
+6P|4|||||||U||||||||||||||||||||||||||97
+7O|1|2012975||^^^0013|||||||||||^|||||||||||F||||||33
+0R|1|^^^0013|13.900|s||||F||||20200313153618|94
+1C|1|I|73^Warning: Sample sensor off|IA6
+2C|2|I|74^Warning: Reagent sensor off|I0D
+3R|2|^^^0013|1.158|R||||F||||20200313153618|49
+4C|1|I|73^Warning: Sample sensor off|IA9
+5C|2|I|74^Warning: Reagent sensor off|I10
+6R|3|^^^0013|1.160|INR||||F||||20200313153618|DD
+7C|1|I|73^Warning: Sample sensor off|IAC
+0C|2|I|74^Warning: Reagent sensor off|I0B
+1R|4|^^^0013||%||||F||||20200313153618|1F
+2C|1|I|301^Result out of Test Range|IE3
+3C|2|I|73^Warning: Sample sensor off|IA9
+4C|3|I|74^Warning: Reagent sensor off|I10
+5P|5|||||||U||||||||||||||||||||||||||97
+6O|1|2012973||^^^0013|||||||||||^|||||||||||F||||||30
+7R|1|^^^0013|17.400|s||||F||||20200313153618|9A
+0C|1|I|300^Result out of Normal Range|IA9
+1C|2|I|73^Warning: Sample sensor off|IA7
+2C|3|I|74^Warning: Reagent sensor off|I0E
+3R|2|^^^0013|1.450|R||||F||||20200313153618|44
+4C|1|I|73^Warning: Sample sensor off|IA9
+5C|2|I|74^Warning: Reagent sensor off|I10
+6R|3|^^^0013|1.455|INR||||F||||20200313153618|E4
+7C|1|I|73^Warning: Sample sensor off|IAC
+0C|2|I|74^Warning: Reagent sensor off|I0B
+1R|4|^^^0013||%||||F||||20200313153618|1F
+2C|1|I|301^Result out of Test Range|IE3
+3C|2|I|73^Warning: Sample sensor off|IA9
+4C|3|I|74^Warning: Reagent sensor off|I10
+5P|6|||||||U||||||||||||||||||||||||||98
+6O|1|2012969||^^^0013|||||||||||^|||||||||||F||||||35
+7R|1|^^^0013|13.500|s||||F||||20200313152906|96
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|2|^^^0013|1.125|R||||F||||20200313152906|41
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|3|^^^0013|1.126|INR||||F||||20200313152906|DD
+6C|1|I|73^Warning: Sample sensor off|IAB
+7C|2|I|74^Warning: Reagent sensor off|I12
+0R|4|^^^0013||%||||F||||20200313152906|1D
+1C|1|I|301^Result out of Test Range|IE2
+2C|2|I|73^Warning: Sample sensor off|IA8
+3C|3|I|74^Warning: Reagent sensor off|I0F
+4O|2|2012969||^^^0092|||||||||||^|||||||||||F||||||3B
+5R|1|^^^0092|33.400|s||||F||||20200313152906|9C
+6C|1|I|73^Warning: Sample sensor off|IAB
+7C|2|I|74^Warning: Reagent sensor off|I12
+0R|2|^^^0092|1.043|R||||F||||20200313152906|45
+1C|1|I|73^Warning: Sample sensor off|IA6
+2C|2|I|74^Warning: Reagent sensor off|I0D
+3P|7|||||||U||||||||||||||||||||||||||97
+4O|1|2012967||^^^0013|||||||||||^|||||||||||F||||||31
+5R|1|^^^0013|17.100|s||||F||||20200313152906|94
+6C|1|I|300^Result out of Normal Range|IAF
+7C|2|I|73^Warning: Sample sensor off|IAD
+0C|3|I|74^Warning: Reagent sensor off|I0C
+1R|2|^^^0013|1.425|R||||F||||20200313152906|43
+2C|1|I|73^Warning: Sample sensor off|IA7
+3C|2|I|74^Warning: Reagent sensor off|I0E
+4R|3|^^^0013|1.430|INR||||F||||20200313152906|DA
+5C|1|I|73^Warning: Sample sensor off|IAA
+6C|2|I|74^Warning: Reagent sensor off|I11
+7R|4|^^^0013||%||||F||||20200313152906|24
+0C|1|I|301^Result out of Test Range|IE1
+1C|2|I|73^Warning: Sample sensor off|IA7
+2C|3|I|74^Warning: Reagent sensor off|I0E
+3O|2|2012967||^^^0092|||||||||||^|||||||||||F||||||38
+4R|1|^^^0092|48.700|s||||F||||20200313152906|A4
+5C|1|I|300^Result out of Normal Range|IAE
+6C|2|I|73^Warning: Sample sensor off|IAC
+7C|3|I|74^Warning: Reagent sensor off|I13
+0R|2|^^^0092|1.521|R||||F||||20200313152906|46
+1C|1|I|73^Warning: Sample sensor off|IA6
+2C|2|I|74^Warning: Reagent sensor off|I0D
+3P|8|||||||U||||||||||||||||||||||||||98
+4O|1|2012966||^^^0013|||||||||||^|||||||||||F||||||30
+5R|1|^^^0013|12.700|s||||F||||20200313152906|95
+6C|1|I|73^Warning: Sample sensor off|IAB
+7C|2|I|74^Warning: Reagent sensor off|I12
+0R|2|^^^0013|1.058|R||||F||||20200313152906|44
+1C|1|I|73^Warning: Sample sensor off|IA6
+2C|2|I|74^Warning: Reagent sensor off|I0D
+3R|3|^^^0013|1.059|INR||||F||||20200313152906|E0
+4C|1|I|73^Warning: Sample sensor off|IA9
+5C|2|I|74^Warning: Reagent sensor off|I10
+6R|4|^^^0013||%||||F||||20200313152906|23
+7C|1|I|301^Result out of Test Range|IE8
+0C|2|I|73^Warning: Sample sensor off|IA6
+1C|3|I|74^Warning: Reagent sensor off|I0D
+2P|9|||||||U||||||||||||||||||||||||||98
+3O|1|2012961||^^^0013|||||||||||^|||||||||||F||||||2A
+4R|1|^^^0013|11.700|s||||F||||20200313152906|93
+5C|1|I|73^Warning: Sample sensor off|IAA
+6C|2|I|74^Warning: Reagent sensor off|I11
+7R|2|^^^0013|0.975|R||||F||||20200313152906|52
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|3|^^^0013|0.975|INR||||F||||20200313152906|E5
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|4|^^^0013||%||||F||||20200313152906|22
+6C|1|I|301^Result out of Test Range|IE7
+7C|2|I|73^Warning: Sample sensor off|IAD
+0C|3|I|74^Warning: Reagent sensor off|I0C
+1O|2|2012961||^^^0092|||||||||||^|||||||||||F||||||30
+2R|1|^^^0092|28.100|s||||F||||20200313152906|9A
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|2|^^^0092|0.878|R||||F||||20200313152906|59
+6C|1|I|73^Warning: Sample sensor off|IAB
+7C|2|I|74^Warning: Reagent sensor off|I12
+0P|10|||||||U||||||||||||||||||||||||||BE
+1O|1|2012957||^^^0013|||||||||||^|||||||||||F||||||2D
+2R|1|^^^0013|12.000|s||||F||||20200313152906|8B
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|2|^^^0013|1.000|R||||F||||20200313152906|3C
+6C|1|I|73^Warning: Sample sensor off|IAB
+7C|2|I|74^Warning: Reagent sensor off|I12
+0R|3|^^^0013|1.000|INR||||F||||20200313152906|CF
+1C|1|I|73^Warning: Sample sensor off|IA6
+2C|2|I|74^Warning: Reagent sensor off|I0D
+3R|4|^^^0013||%||||F||||20200313152906|20
+4C|1|I|301^Result out of Test Range|IE5
+5C|2|I|73^Warning: Sample sensor off|IAB
+6C|3|I|74^Warning: Reagent sensor off|I12
+7O|2|2012957||^^^0093|||||||||||^|||||||||||F||||||3C
+0R|1|^^^0093|29.950|s||||F||||20200313152906|A7
+1C|1|I|73^Warning: Sample sensor off|IA6
+2C|2|I|74^Warning: Reagent sensor off|I0D
+3R|2|^^^0093|0.936|R||||F||||20200313152906|53
+4C|1|I|73^Warning: Sample sensor off|IA9
+5C|2|I|74^Warning: Reagent sensor off|I10
+6P|11|||||||U||||||||||||||||||||||||||C5
+7O|1|2012954||^^^0013|||||||||||^|||||||||||F||||||30
+0R|1|^^^0013|15.000|s||||F||||20200313152906|8C
+1C|1|I|300^Result out of Normal Range|IAA
+2C|2|I|73^Warning: Sample sensor off|IA8
+3C|3|I|74^Warning: Reagent sensor off|I0F
+4R|2|^^^0013|1.250|R||||F||||20200313152906|42
+5C|1|I|73^Warning: Sample sensor off|IAA
+6C|2|I|74^Warning: Reagent sensor off|I11
+7R|3|^^^0013|1.253|INR||||F||||20200313152906|E0
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|4|^^^0013||%||||F||||20200313152906|1F
+3C|1|I|301^Result out of Test Range|IE4
+4C|2|I|73^Warning: Sample sensor off|IAA
+5C|3|I|74^Warning: Reagent sensor off|I11
+6P|12|||||||U||||||||||||||||||||||||||C6
+7O|1|2012952||^^^0013|||||||||||^|||||||||||F||||||2E
+0R|1|^^^0013|10.600|s||||F||||20200313152906|8D
+1C|1|I|300^Result out of Normal Range|IAA
+2C|2|I|73^Warning: Sample sensor off|IA8
+3C|3|I|74^Warning: Reagent sensor off|I0F
+4R|2|^^^0013|0.883|R||||F||||20200313152906|4D
+5C|1|I|73^Warning: Sample sensor off|IAA
+6C|2|I|74^Warning: Reagent sensor off|I11
+7R|3|^^^0013|0.882|INR||||F||||20200313152906|E7
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|4|^^^0013||%||||F||||20200313152906|1F
+3C|1|I|301^Result out of Test Range|IE4
+4C|2|I|73^Warning: Sample sensor off|IAA
+5C|3|I|74^Warning: Reagent sensor off|I11
+6P|13|||||||U||||||||||||||||||||||||||C7
+7O|1|2012941||^^^0013|||||||||||^|||||||||||F||||||2C
+0R|1|^^^0013|12.900|s||||F||||20200313145922|92
+1C|1|I|73^Warning: Sample sensor off|IA6
+2C|2|I|74^Warning: Reagent sensor off|I0D
+3R|2|^^^0013|1.075|R||||F||||20200313145922|46
+4C|1|I|73^Warning: Sample sensor off|IA9
+5C|2|I|74^Warning: Reagent sensor off|I10
+6R|3|^^^0013|1.076|INR||||F||||20200313145922|E2
+7C|1|I|73^Warning: Sample sensor off|IAC
+0C|2|I|74^Warning: Reagent sensor off|I0B
+1R|4|^^^0013||%||||F||||20200313145922|1E
+2C|1|I|301^Result out of Test Range|IE3
+3C|2|I|73^Warning: Sample sensor off|IA9
+4C|3|I|74^Warning: Reagent sensor off|I10
+5P|14|||||||U||||||||||||||||||||||||||C7
+6O|1|2012948||^^^0013|||||||||||^|||||||||||F||||||32
+7R|1|^^^0013|12.600|s||||F||||20200313145922|96
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|2|^^^0013|1.050|R||||F||||20200313145922|3E
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|3|^^^0013|1.051|INR||||F||||20200313145922|DA
+6C|1|I|73^Warning: Sample sensor off|IAB
+7C|2|I|74^Warning: Reagent sensor off|I12
+0R|4|^^^0013||%||||F||||20200313145922|1D
+1C|1|I|301^Result out of Test Range|IE2
+2C|2|I|73^Warning: Sample sensor off|IA8
+3C|3|I|74^Warning: Reagent sensor off|I0F
+4P|15|||||||U||||||||||||||||||||||||||C7
+5O|1|2012947||^^^0013|||||||||||^|||||||||||F||||||30
+6R|1|^^^0013|14.700|s||||F||||20200313145922|98
+7C|1|I|73^Warning: Sample sensor off|IAC
+0C|2|I|74^Warning: Reagent sensor off|I0B
+1R|2|^^^0013|1.225|R||||F||||20200313145922|41
+2C|1|I|73^Warning: Sample sensor off|IA7
+3C|2|I|74^Warning: Reagent sensor off|I0E
+4R|3|^^^0013|1.227|INR||||F||||20200313145922|DE
+5C|1|I|73^Warning: Sample sensor off|IAA
+6C|2|I|74^Warning: Reagent sensor off|I11
+7R|4|^^^0013||%||||F||||20200313145922|24
+0C|1|I|301^Result out of Test Range|IE1
+1C|2|I|73^Warning: Sample sensor off|IA7
+2C|3|I|74^Warning: Reagent sensor off|I0E
+3P|16|||||||U||||||||||||||||||||||||||C7
+4O|1|2012945||^^^0013|||||||||||^|||||||||||F||||||2D
+5R|1|^^^0013|10.800|s||||F||||20200313145922|94
+6C|1|I|300^Result out of Normal Range|IAF
+7C|2|I|73^Warning: Sample sensor off|IAD
+0C|3|I|74^Warning: Reagent sensor off|I0C
+1R|2|^^^0013|0.900|R||||F||||20200313145922|40
+2C|1|I|73^Warning: Sample sensor off|IA7
+3C|2|I|74^Warning: Reagent sensor off|I0E
+4R|3|^^^0013|0.899|INR||||F||||20200313145922|EC
+5C|1|I|73^Warning: Sample sensor off|IAA
+6C|2|I|74^Warning: Reagent sensor off|I11
+7R|4|^^^0013||%||||F||||20200313145922|24
+0C|1|I|301^Result out of Test Range|IE1
+1C|2|I|73^Warning: Sample sensor off|IA7
+2C|3|I|74^Warning: Reagent sensor off|I0E
+3P|17|||||||U||||||||||||||||||||||||||C8
+4O|1|2012943||^^^0013|||||||||||^|||||||||||F||||||2B
+5R|1|^^^0013|11.500|s||||F||||20200313145922|92
+6C|1|I|73^Warning: Sample sensor off|IAB
+7C|2|I|74^Warning: Reagent sensor off|I12
+0R|2|^^^0013|0.958|R||||F||||20200313145922|4C
+1C|1|I|73^Warning: Sample sensor off|IA6
+2C|2|I|74^Warning: Reagent sensor off|I0D
+3R|3|^^^0013|0.958|INR||||F||||20200313145922|E7
+4C|1|I|73^Warning: Sample sensor off|IA9
+5C|2|I|74^Warning: Reagent sensor off|I10
+6R|4|^^^0013||%||||F||||20200313145922|23
+7C|1|I|301^Result out of Test Range|IE8
+0C|2|I|73^Warning: Sample sensor off|IA6
+1C|3|I|74^Warning: Reagent sensor off|I0D
+2P|18|||||||U||||||||||||||||||||||||||C8
+3O|1|2012935||^^^0013|||||||||||^|||||||||||F||||||2B
+4R|1|^^^0013|13.000|s||||F||||20200313145922|8E
+5C|1|I|73^Warning: Sample sensor off|IAA
+6C|2|I|74^Warning: Reagent sensor off|I11
+7R|2|^^^0013|1.083|R||||F||||20200313145922|49
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|3|^^^0013|1.084|INR||||F||||20200313145922|DD
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|4|^^^0013||%||||F||||20200313145922|22
+6C|1|I|301^Result out of Test Range|IE7
+7C|2|I|73^Warning: Sample sensor off|IAD
+0C|3|I|74^Warning: Reagent sensor off|I0C
+1P|19|||||||U||||||||||||||||||||||||||C8
+2O|1|2012934||^^^0013|||||||||||^|||||||||||F||||||29
+3R|1|^^^0013|16.300|s||||F||||20200313145922|93
+4C|1|I|300^Result out of Normal Range|IAD
+5C|2|I|73^Warning: Sample sensor off|IAB
+6C|3|I|74^Warning: Reagent sensor off|I12
+7R|2|^^^0013|1.358|R||||F||||20200313145922|4E
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|3|^^^0013|1.362|INR||||F||||20200313145922|DC
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|4|^^^0013||%||||F||||20200313145922|22
+6C|1|I|301^Result out of Test Range|IE7
+7C|2|I|73^Warning: Sample sensor off|IAD
+0C|3|I|74^Warning: Reagent sensor off|I0C
+1P|20|||||||U||||||||||||||||||||||||||C0
+2O|1|2012927||^^^0013|||||||||||^|||||||||||F||||||2B
+3R|1|^^^0013|10.900|s||||F||||20200313145212|8B
+4C|1|I|300^Result out of Normal Range|IAD
+5C|2|I|73^Warning: Sample sensor off|IAB
+6C|3|I|74^Warning: Reagent sensor off|I12
+7R|2|^^^0013|0.908|R||||F||||20200313145212|46
+0C|1|I|73^Warning: Sample sensor off|IA5
+1C|2|I|74^Warning: Reagent sensor off|I0C
+2R|3|^^^0013|0.907|INR||||F||||20200313145212|D8
+3C|1|I|73^Warning: Sample sensor off|IA8
+4C|2|I|74^Warning: Reagent sensor off|I0F
+5R|4|^^^0013||%||||F||||20200313145212|1A
+6C|1|I|301^Result out of Test Range|IE7
+7C|2|I|73^Warning: Sample sensor off|IAD
+0C|3|I|74^Warning: Reagent sensor off|I0C
+1L|1|N04
+

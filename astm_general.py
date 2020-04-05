@@ -23,6 +23,7 @@ host_port='11111'
 s=None
 x=None
 logfile_name='/var/log/astm_general.log'
+log=1	#0=disable anyother=enable
 output_folder='/root/astm_general.data/' #remember ending/
 alarm_time=10
 
@@ -147,6 +148,8 @@ def my_write(port,byte):
   elif(connection_type=='tcp'):
     return port.send(byte)
 #main loop##########################
+if log==0:
+  logging.disable(logging.CRITICAL)
 
 signal.signal(signal.SIGALRM, signal_handler)
 port=get_port()
