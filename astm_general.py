@@ -13,7 +13,7 @@ import sys
 
 #tcp ->uncomment as needed
 connection_type='tcp'
-host_address='11.207.1.1'
+host_address='12.207.3.230'
 host_port='11111'
 
 ############################
