@@ -63,7 +63,7 @@ class astm_file(object):
     self.previous_byte=''
     self.next_frame_number=1	#First frame after ENQ-STX is always 1 (not 0)
     self.next_char_chksum_1=False
-    self.next_char_chksum_1=True
+    self.next_char_chksum_2=False
     self.file_chksum=''
     self.checksum=0
     
@@ -75,6 +75,7 @@ class astm_file(object):
     self.lf =b'\x0a'
     self.cr =b'\x0d'
     self.etb=b'\x17'
+    self.text_data=b''
     
   def get_first_file(self):
     inbox_files=os.listdir(self.inbox)
@@ -184,7 +185,7 @@ class astm_file(object):
         else:
           msg='Un-Expected frame number ??:'+ chr(ord(data) + ' >> Expected '+ self.next_frame_number )
           logging.debug(msg)
-    
+      
     #verify checksum or calculate it
     if self.next_char_chksum_1 ==True:
       self.file_chksum=self.file_chksum + chr(ord(data))
@@ -208,6 +209,7 @@ class astm_file(object):
       self.checksum=(self.checksum+ord(data))%256
       #checksum include everything after stx(not stx) including/upto ETB/ETX 
       #ETX,ETB,CR taken care of in its function
+      self.
       
     
        
