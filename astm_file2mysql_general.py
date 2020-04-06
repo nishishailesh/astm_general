@@ -93,6 +93,8 @@ class astm_file(object):
     self.etb=b'\x17'
     self.text_data=b''
     
+    self.sample_id=''
+    
   def get_first_file(self):
     inbox_files=os.listdir(self.inbox)
     for each_file in inbox_files:
@@ -237,7 +239,6 @@ class astm_file(object):
       self.checksum=(self.checksum+ord(data))%256
       #checksum include everything after stx(not stx) including/upto ETB/ETX 
       #ETX,ETB,CR taken care of in its function
-      self.
       
       self.previous_char_was_checksum2=False
 
@@ -270,14 +271,17 @@ class astm_file(object):
           self.on_header(x)
         elif x[0]=='P':
           self.on_patient(x)
+        elif x[0]=='O':
+          self.on_order(x)
         else:
           self.on_any_line(x)
           
   def on_any_line(self,any_line):
     #print(any_line)
     temp=any_line.split(self.s1)
-    print(temp)
-
+    logging.debug(temp)
+    return temp 
+    
   def on_header(self,header_line):
     self.s1=header_line[1]
     self.s2=header_line[2]
@@ -288,8 +292,20 @@ class astm_file(object):
   def on_patient(self,patient_line):
     patient_tuple=self.on_any_line(patient_line)
     #initialize
+    pstr='New Patient number:{pn} arrived. Initializing...'.format(pn=patient_tuple[1])
+    logging.debug(pstr)
+    pstr='Previous Sample Id:({psid}) ...'.format(psid=self.sample_id)
+    logging.debug(pstr)
+    self.sample_id=''
+    pstr='Sample Id:({sid}) after initialization'.format(sid=self.sample_id)
+    logging.debug(pstr)    
 
-
+  def on_order(self,order_line):
+    order_tuple=self.on_any_line(order_line)
+    #initialize
+    self.sample_id=order_tuple[2]
+    pstr='New Sample Id:({sid})'.format(sid=self.sample_id)
+    logging.debug(pstr)
 #Main Code###############################
 if __name__=='__main__':
   #print('__name__ is ',__name__,',so running code')
