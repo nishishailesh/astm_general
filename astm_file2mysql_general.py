@@ -15,11 +15,20 @@ my_user='uuu'
 my_pass='ppp'
 '''
 
+'''
+if anything is redirected, last newline is added.
+To prevent it, use following
+I needed this while outputting relevant data to a file via stdout redirection
+
+echo -n `./astm_file2mysql_general.py` > x
+'''
+
+#print(dir(astm_var))
+
 sys.path.append('/var/gmcs_config')
 import astm_var
 
 #check if import successful
-#print(dir(astm_var))
 
 #Globals for configuration################
 log=1
@@ -66,6 +75,13 @@ class astm_file(object):
     self.next_char_chksum_2=False
     self.file_chksum=''
     self.checksum=0
+    self.relevant_data=[]
+    self.previous_char_was_checksum2=False
+    
+    self.s1='|'
+    self.s2='`'
+    self.s3='^'
+    self.s4='&'
     
     self.stx=b'\x02'
     self.etx=b'\x03'
@@ -132,6 +148,8 @@ class astm_file(object):
         
       self.previous_byte=data
 
+
+      
   def manage_ack(self,data):
     logging.debug('ACK')
 
@@ -146,6 +164,10 @@ class astm_file(object):
   def manage_cr(self,data):
     logging.debug('CR')
     self.checksum=(self.checksum+ord(data))%256
+    if self.previous_char_was_checksum2==False:
+      self.relevant_data=self.relevant_data+[chr(ord(data))]
+      
+
 
   def manage_lf(self,data):
     logging.debug('LF')
@@ -170,13 +192,16 @@ class astm_file(object):
   def manage_other(self,data):
 
     logging.debug(data)
+    this_is_frame_number=False #by default, it can be local
     
     #verfy frame number
+    #if it is make sure it is not part of relevant data
     if(self.previous_byte==self.stx):
       if chr(ord(data)).isnumeric()==True :
         msg='Number found, it is a frame number:'+ chr(ord(data))
         logging.debug(msg)
         if(self.next_frame_number==int(data)):
+          this_is_frame_number=True
           msg='Expected frame number :'+ chr(ord(data)) + ' is correct'
           logging.debug(msg)
           self.next_frame_number=self.next_frame_number+1
@@ -191,10 +216,13 @@ class astm_file(object):
       self.file_chksum=self.file_chksum + chr(ord(data))
       self.next_char_chksum_1=False
       self.next_char_chksum_2=True
+      self.previous_char_was_checksum2=False
+      
     elif self.next_char_chksum_2 ==True:
       self.file_chksum=self.file_chksum + chr(ord(data))
       self.next_char_chksum_2=False
       two_digit_checksum_string='{chksum:X}'.format(chksum=self.checksum).zfill(2)  
+      self.previous_char_was_checksum2=True
       
       #two_digit_file_checksum_string=''.join(self.file_chksum)              
       two_digit_file_checksum_string=self.file_chksum
@@ -211,8 +239,14 @@ class astm_file(object):
       #ETX,ETB,CR taken care of in its function
       self.
       
-    
-       
+      self.previous_char_was_checksum2=False
+
+      #include everything except STX,ETX EOT,ETB,LF etc 
+      # include CR in its own function (if not after checksum)
+      # exclude frame numbers too      
+      if this_is_frame_number!=True:
+        self.relevant_data=self.relevant_data+[chr(ord(data))]
+        
   def send_to_mysql(self):
     #sql='insert into primary_result_blob (sample_id,examination_id,result,uniq) values (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE result=%s'
     #data_tpl=(self.abx_result[30].rstrip(' '),key,self.abx_result[key],self.abx_result[26],self.abx_result[key])
@@ -223,7 +257,39 @@ class astm_file(object):
     #os.rename(self.inbox+self.current_file,self.archived+self.current_file)
     pass
     
-      
+
+
+  def mk_tuple(self):
+    raw_data=''.join(m.relevant_data)
+    each_line=raw_data.split('\x0d')
+    
+    #last char is <CR>, so last element of tuple is empty
+    for x in each_line:
+      if len(x)>0:
+        if x[0]=='H':
+          self.on_header(x)
+        elif x[0]=='P':
+          self.on_patient(x)
+        else:
+          self.on_any_line(x)
+          
+  def on_any_line(self,any_line):
+    #print(any_line)
+    temp=any_line.split(self.s1)
+    print(temp)
+
+  def on_header(self,header_line):
+    self.s1=header_line[1]
+    self.s2=header_line[2]
+    self.s3=header_line[3]
+    self.s4=header_line[4]
+    header_tuple=self.on_any_line(header_line)
+
+  def on_patient(self,patient_line):
+    patient_tuple=self.on_any_line(patient_line)
+    #initialize
+
+
 #Main Code###############################
 if __name__=='__main__':
   #print('__name__ is ',__name__,',so running code')
@@ -231,8 +297,10 @@ if __name__=='__main__':
     m=astm_file(inbox,archived)
     if(m.get_first_file()):
       m.analyse_file()
+      m.mk_tuple()
       m.send_to_mysql()
       m.archive_file()
     time.sleep(1)
     break;
   
+    
