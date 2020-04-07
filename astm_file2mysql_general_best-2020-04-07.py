@@ -5,6 +5,46 @@ import MySQLdb
 import time
 import logging
 
+#to ensure that password is not in main sources
+#prototype file is as follows
+
+'''
+example /var/gmcs_config/astm_var.py
+#!/usr/bin/python3.7
+my_user='uuu'
+my_pass='ppp'
+'''
+
+'''
+if anything is redirected, last newline is added.
+To prevent it, use following
+I needed this while outputting relevant data to a file via stdout redirection
+
+echo -n `./astm_file2mysql_general.py` > x
+'''
+
+#print(dir(astm_var))
+
+sys.path.append('/var/gmcs_config')
+import astm_var
+
+#check if import successful
+
+#Globals for configuration################
+log=1
+my_host='127.0.0.1'
+my_user=astm_var.my_user
+my_pass=astm_var.my_pass
+my_db='cl_general'
+
+inbox='/root/astm_general.data/'
+archived='/root/astm_general.arch/'
+log_filename='/var/log/astm_file2mysql_general.log'
+
+logging.basicConfig(filename=log_filename,level=logging.DEBUG)
+if log==0:
+  logging.disable(logging.CRITICAL)
+
 ##########MYSQL##
 def run_query(prepared_sql,data_tpl):
   con=MySQLdb.connect(my_host,my_user,my_pass,my_db)
@@ -18,6 +58,9 @@ def run_query(prepared_sql,data_tpl):
   cur.execute(prepared_sql,data_tpl)
   con.commit()
   return cur
+
+def get_single_row(cur):
+    return cur.fetchone()
 
 #classes#################################
 class astm_file(object):
@@ -109,7 +152,9 @@ class astm_file(object):
         self.manage_other(data)
         
       self.previous_byte=data
-   
+
+
+      
   def manage_ack(self,data):
     logging.debug('ACK')
 
@@ -127,6 +172,8 @@ class astm_file(object):
     if self.previous_char_was_checksum2==False:
       self.relevant_data=self.relevant_data+[chr(ord(data))]
       
+
+
   def manage_lf(self,data):
     logging.debug('LF')
 
@@ -218,7 +265,7 @@ class astm_file(object):
 
 
   def mk_tuple(self):
-    raw_data=''.join(self.relevant_data)
+    raw_data=''.join(m.relevant_data)
     each_line=raw_data.split('\x0d')
     
     #last char is <CR>, so last element of tuple is empty
@@ -237,16 +284,16 @@ class astm_file(object):
         else:
           self.on_any_other_result(x)
           
-    logging.debug(self.final_data)
-    #for each_sample in self.final_data:
-    #  msg='{}\t{}'.format(each_sample[0],each_sample[1])
-    #  logging.debug(msg)
+    #print(self.final_data)
+    for each_sample in self.final_data:
+      msg='{}\t{}'.format(each_sample[0],each_sample[1])
+      logging.debug(msg)
       
   def on_any_line(self,any_line):
     #print(any_line)
     temp=any_line.split(self.s1)
     logging.debug(temp)    
-    return tuple(temp) 
+    return temp 
     
   #must to identify seperators  
   def on_header(self,header_line):
@@ -261,18 +308,11 @@ class astm_file(object):
     #Manage previous patient (here and last patient on getting termination record
     if len(str(self.sample_id))>0:
       self.final_data=self.final_data + ((self.sample_id,self.result),)
-  
+    
     patient_tuple=self.on_any_line(patient_line)
-
     #initialize
-    try:
-      pstr='New Patient number:{pn} arrived. Initializing...'.format(pn=patient_tuple[1])
-      logging.debug(pstr)
-    except Exception as my_ex:
-      pstr='Look at P record <<<{}>>> Is it inappropriate? no patient_tuple[1] found'.format(patient_tuple)      
-      logging.debug(pstr)
-      logging.debug(my_ex)
-      
+    pstr='New Patient number:{pn} arrived. Initializing...'.format(pn=patient_tuple[1])
+    logging.debug(pstr)
     pstr='Previous Sample Id:({psid}) ...'.format(psid=self.sample_id)
     logging.debug(pstr)
     self.sample_id=''
@@ -284,22 +324,14 @@ class astm_file(object):
     self.result=()
     pstr='Results:({res}) after initialization'.format(res=self.result)
     logging.debug(pstr)
-  
-      
+
   #must for finding sample ID
   def on_order(self,order_line):
     order_tuple=self.on_any_line(order_line)
     #initialize
-    
-    try:
-      self.sample_id=order_tuple[2]
-      pstr='New Sample Id:({sid})'.format(sid=self.sample_id)
-      logging.debug(pstr)
-    except Exception as my_ex:
-      pstr='Look at O record <<<{}>>> Is it inappropriate? no order_tuple[2] found'.format(order_tuple)
-      logging.debug(pstr)
-      logging.debug(my_ex)
-          
+    self.sample_id=order_tuple[2]
+    pstr='New Sample Id:({sid})'.format(sid=self.sample_id)
+    logging.debug(pstr)
 
   '''
   #Removed,  because some equipments report results in 'M' fields, too
@@ -331,8 +363,6 @@ class astm_file(object):
       self.final_data=self.final_data + ((self.sample_id,self.result),)
 
 #Main Code###############################
-#use this to device your own script
-'''
 if __name__=='__main__':
   #print('__name__ is ',__name__,',so running code')
   while True:
@@ -344,5 +374,5 @@ if __name__=='__main__':
       m.archive_file()
     time.sleep(1)
     #break; #useful during debugging
-'''  
+  
     
