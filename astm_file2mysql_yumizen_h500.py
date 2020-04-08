@@ -3,7 +3,7 @@
 import sys
 import logging
 import time
-
+import zlib
 import astm_file2mysql_general as astmg
 
 #to ensure that password is not in main sources
@@ -53,8 +53,24 @@ class yumizenp500(astmg.astm_file):
       msg='sample_id is {}'.format(each_sample[0])
       logging.debug(msg)
       for each_result in each_sample[1]:
-        msg='Examination: {} --> Result  {}'.format(each_result[2],each_result[3])
-        logging.debug(msg)
+        if(each_result[0]=='R'):
+          msg='Examination: {} --> Result  {}'.format(each_result[2],each_result[3])
+          logging.debug(msg) 
+        elif(each_result[0]=='M'):
+          #print(each_result)
+          msg_type=each_result[2]
+          if(msg_type=='HISTOGRAM' or  msg_type=='MATRIX' ):
+            points=each_result[6].split(self.s3)
+            print(points[1])
+            msg='Msg_type: {} MsType: {} Name: {} --> Thresold  {}'.format(msg_type, each_result[3],each_result[4],each_result[5])
+            logging.debug(msg) 
+            #print (zlib.decompress(points[1].encode()))
+            f = open(each_result[4], "w")
+            f.write(points[1])
+            f.close()
+            
+            
+        
   
 #Main Code###############################
 if __name__=='__main__':
