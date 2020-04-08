@@ -6,22 +6,23 @@ import time
 import logging
 
 ##########MYSQL##
-def run_query(prepared_sql,data_tpl):
-  con=MySQLdb.connect(my_host,my_user,my_pass,my_db)
-  if(debug==1): print(con)
-  if(con==None):
-     if(debug==1): print("Can't connect to database")
-  else:
-    pass
-    #print('connected')
-  cur=con.cursor()
-  cur.execute(prepared_sql,data_tpl)
-  con.commit()
-  return cur
+
 
 #classes#################################
 class astm_file(object):
-  
+  def run_query(self,my_host,my_user,my_pass,my_db,prepared_sql,data_tpl):
+    con=MySQLdb.connect(my_host,my_user,my_pass,my_db)
+    logging.debug(con)
+    if(con==None):
+      if(debug==1): logging.debug("Can't connect to database")
+    else:
+      pass
+      logging.debug('connected')
+    cur=con.cursor()
+    cur.execute(prepared_sql,data_tpl)
+    con.commit()
+    return cur
+    
   def __init__(self,inbox_folder,archived_folder):
     self.inbox=inbox_folder
     self.archived=archived_folder

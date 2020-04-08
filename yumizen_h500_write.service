@@ -1,0 +1,10 @@
+[Unit]
+Description=Writes Youmizen H500 inbox data to mysql database of 10.206.10.26
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/root/yumizen_h500/astm_file2mysql_yumizen_h500.py
+
+[Install]
+WantedBy=multi-user.target

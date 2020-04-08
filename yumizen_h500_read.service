@@ -1,0 +1,10 @@
+[Unit]
+Description=Reads data from Yumizen H500 by ASTM Protocol
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/root/yumizen_h500/astm_general.py
+
+[Install]
+WantedBy=multi-user.target
