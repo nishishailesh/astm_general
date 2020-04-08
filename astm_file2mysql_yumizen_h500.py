@@ -52,6 +52,9 @@ class yumizenp500(astmg.astm_file):
     for each_sample in self.final_data:
       msg='sample_id is {}'.format(each_sample[0])
       logging.debug(msg)
+      for each_result in each_sample[1]:
+        msg='Examination: {} --> Result  {}'.format(each_result[2],each_result[3])
+        logging.debug(msg)
   
 #Main Code###############################
 if __name__=='__main__':
