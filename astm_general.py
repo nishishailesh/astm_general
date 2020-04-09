@@ -13,8 +13,8 @@ import sys
 
 #tcp ->uncomment as needed
 connection_type='tcp'
-host_address='12.207.3.230'
-host_port='11111'
+host_address='10.206.10.26'
+host_port='2575'
 
 ############################
 ##########END of (tty vs tcp)######
@@ -24,7 +24,7 @@ s=None
 x=None
 logfile_name='/var/log/astm_general.log'
 log=1	#0=disable anyother=enable
-output_folder='/root/astm_general.data/' #remember ending/
+output_folder='/root/yumizen_h500.data/' #remember ending/
 alarm_time=10
 
 ################################################
@@ -182,7 +182,11 @@ while True:
     byte_array=byte_array+[chr(ord(byte))]	#add everything read to array requred here to add first byte
     my_write(port,b'\x06');
     cur_file=get_filename()					#get name of file to open
+    
     x=open(cur_file,'w')					#open file
+    fcntl.flock(x, fcntl.LOCK_EX | fcntl.LOCK_NB)   #lock file
+
+    
     logging.debug('<ENQ> received. <ACK> Sent. Name of File opened to save data:'+str(cur_file))
     signal.alarm(alarm_time)
     logging.debug('post-enq-ack Alarm started to receive other data')
@@ -206,7 +210,9 @@ while True:
     try:
       if x!=None:
         x.write(''.join(byte_array))			#write to file everytime LF received, to prevent big data memory problem
+        #fcntl.flock(x, fcntl.LOCK_UN)   #unlock file not required, because we are closing it
         x.close()
+        
     except Exception as my_ex:
       logging.debug(my_ex)
       

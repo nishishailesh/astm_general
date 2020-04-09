@@ -4,6 +4,7 @@ import sys
 import MySQLdb
 import time
 import logging
+import fcntl
 
 ##########MYSQL##
 
@@ -63,7 +64,13 @@ class astm_file(object):
         self.current_file=each_file
         msg='File in queue is: '+self.current_file
         logging.debug(msg)
-        return True
+        try:
+          fh=open(self.inbox+self.current_file,'rb')
+          fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+          return True
+        except Exception as my_ex:
+         logging.debug(my_ex)
+         msg="{} is locked. trying next..".format(self.current_file)
     return False  #no file to read
 
   def analyse_file(self):

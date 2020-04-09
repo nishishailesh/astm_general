@@ -38,9 +38,9 @@ my_user=astm_var.my_user
 my_pass=astm_var.my_pass
 my_db='cl_general'
 
-inbox='/root/yumizenp500.data/'
-archived='/root/yumizenp500.arch/'
-log_filename='/var/log/yumizenp500.log'
+inbox='/root/yumizen_h500.data/'
+archived='/root/yumizen_h500.arch/'
+log_filename='/var/log/yumizen_h500.log'
 
 logging.basicConfig(filename=log_filename,level=logging.DEBUG)
 if log==0:
