@@ -5,6 +5,9 @@ import logging
 import time
 import zlib
 import astm_file2mysql_general as astmg
+import zlib
+import base64
+import struct
 
 #to ensure that password is not in main sources
 #prototype file is as follows
@@ -47,40 +50,35 @@ if log==0:
   logging.disable(logging.CRITICAL)
 
 
-
-'''
-yumizen H500 test codes
-========================
-DEBUG:root:sample_id is 2021676
-DEBUG:root:(sid,eid,res)= (2021676 , PCT , 0.26, 20200407152036),  
-DEBUG:root:(sid,eid,res)= (2021676 , NEU# , 1.84, 20200407152036)  
-DEBUG:root:(sid,eid,res)= (2021676 , MCV , 83.6, 20200407152036)   MCV
-DEBUG:root:(sid,eid,res)= (2021676 , P-LCR , 52.0, 20200407152036)
-DEBUG:root:(sid,eid,res)= (2021676 , NEU% , 51.2, 20200407152036)  Neutrophils%
-DEBUG:root:(sid,eid,res)= (2021676 , RDW-CV , 14.0, 20200407152036)RDW
-DEBUG:root:(sid,eid,res)= (2021676 , MPV , 12.3, 20200407152036)
-DEBUG:root:(sid,eid,res)= (2021676 , RBC , 3.63, 20200407152036)   RBC
-DEBUG:root:(sid,eid,res)= (2021676 , P-LCC , 109, 20200407152036)
-DEBUG:root:(sid,eid,res)= (2021676 , MON# , 0.38, 20200407152036)
-DEBUG:root:(sid,eid,res)= (2021676 , WBC , 3.60, 20200407152036)   WBC , 1000
-DEBUG:root:(sid,eid,res)= (2021676 , PLT , 209, 20200407152036)    Platelet, 1000
-DEBUG:root:(sid,eid,res)= (2021676 , LIC% , 0.2, 20200407152036)
-DEBUG:root:(sid,eid,res)= (2021676 , MON% , 10.6, 20200407152036)  Monocyte%
-DEBUG:root:(sid,eid,res)= (2021676 , LIC# , 0.01, 20200407152036)
-DEBUG:root:(sid,eid,res)= (2021676 , LYM# , 1.24, 20200407152036)  
-DEBUG:root:(sid,eid,res)= (2021676 , PDW , 22.9, 20200407152036)
-DEBUG:root:(sid,eid,res)= (2021676 , HGB , 10.3, 20200407152036)   Hb
-DEBUG:root:(sid,eid,res)= (2021676 , LYM% , 34.4, 20200407152036)  Lymphocyte%
-DEBUG:root:(sid,eid,res)= (2021676 , RDW-SD , 50.2, 20200407152036)
-DEBUG:root:(sid,eid,res)= (2021676 , BAS% , 1.2, 20200407152036)   Basophil%
-DEBUG:root:(sid,eid,res)= (2021676 , BAS# , 0.04, 20200407152036)  
-DEBUG:root:(sid,eid,res)= (2021676 , MCH , 28.3, 20200407152036)   MCH
-DEBUG:root:(sid,eid,res)= (2021676 , MCHC , 33.9, 20200407152036)  MCHC
-DEBUG:root:(sid,eid,res)= (2021676 , HCT , 30.3, 20200407152036)   PCV
-DEBUG:root:(sid,eid,res)= (2021676 , EOS# , 0.09, 20200407152036)
-DEBUG:root:(sid,eid,res)= (2021676 , EOS% , 2.6, 20200407152036)   Eosinophil%
-'''
 #sub-class for yumizen H500 ASTM#########
+#zlib.decompress(data, wbits=MAX_WBITS, bufsize=DEF_BUF_SIZE)
+#https://docs.python.org/3/library/zlib.html
+#Read docs for -15, for no header
+def decode_base64_and_inflate( b64string ):
+    decoded_data = base64.b64decode( b64string )
+    return zlib.decompress( decoded_data , -15)
+
+#not used in this project
+def deflate_and_base64_encode( string_val ):
+    zlibbed_str = zlib.compress( string_val )
+    compressed_string = zlibbed_str[2:-4]
+    return base64.b64encode( compressed_string )
+
+
+def mk_num_tuple_from_def_base_byte_str(def_base_byte_str):
+  non_base_inflated_str=decode_base64_and_inflate(def_base_byte_str)
+  length=len(non_base_inflated_str)
+  num_tuple=()
+  count=0
+  while count<length:
+    x=non_base_inflated_str[count:count+4]
+    #FLOATLE Little Enedian Float
+    #https://docs.python.org/2/library/struct.html#format-characters
+    num_value=struct.unpack('f',x)
+    num_tuple=num_tuple + (num_value)
+    count=count+4
+  return num_tuple
+
 
 class yumizenp500(astmg.astm_file):
 
@@ -157,19 +155,62 @@ class yumizenp500(astmg.astm_file):
           data_tpl=(
                        sample_id,\
                        56,\
-                       'Done on Yumizen H500',\
+                       'Done on automated Yumizen H500',\
                        uniq,\
-                       'Done on Yumizen H500'
+                       'Done on automated Yumizen H500'
                      )
             
           self.run_query(my_host,my_user,my_pass,my_db,prepared_sql,data_tpl)            
           
-          
-        '''
+        
         elif(each_result[0]=='M'):
           #print(each_result)
           msg_type=each_result[2]
-          if(msg_type=='HISTOGRAM' or  msg_type=='MATRIX' ):
+          if(msg_type=='HISTOGRAM'):
+            points=each_result[6].split(self.s3)
+            num_tuple=mk_num_tuple_from_def_base_byte_str(points[1])
+            print(num_tuple)
+            print('Histogram details')
+            x_display_min=num_tuple[0]
+            print('x_display_min=' , x_display_min)
+            x_display_max=num_tuple[1]
+            print('x_display_max=' , x_display_max)
+            y_display_min=num_tuple[2]
+            print('y_display_min=' , y_display_min)
+            y_display_max=num_tuple[3]
+            print('y_display_max=' , y_display_max)
+            x_tick_num=int(num_tuple[4])
+            print('x_tick_num=' , x_tick_num)
+            
+            start_cur=5
+            end_cur=start_cur + x_tick_num
+            xtk=()
+            
+            #for range(5,5) it does nothing
+            for cur in range(start_cur,end_cur):           
+              xtk=xtk+(num_tuple[cur],)
+            print('xtk values=' , xtk)
+
+
+            y_tick_num=int(num_tuple[end_cur])
+            print('y_tick_num=' , y_tick_num)
+            
+            start_cur=end_cur+1
+            end_cur=start_cur + y_tick_num
+            ytk=()
+            
+            #for range(5,5) it does nothing
+            for cur in range(start_cur,end_cur):           
+              ytk=ytk+(num_tuple[cur],)
+            print('ytk values=' , ytk)
+
+            num_of_list=int(num_tuple[end_cur])
+            print('num_of_list=' , num_of_list)
+
+            list_length=int(num_tuple[end_cur+1])
+            print('list_length=' , list_length)
+              
+          '''elif(msg_type=='HISTOGRAM' or  msg_type=='MATRIX' ):
             points=each_result[6].split(self.s3)
             print(points[1])
             msg='Msg_type: {} MsType: {} Name: {} --> Thresold  {}'.format(msg_type, each_result[3],each_result[4],each_result[5])
@@ -177,11 +218,10 @@ class yumizenp500(astmg.astm_file):
             #print (zlib.decompress(points[1].encode()))
             f = open(each_result[4], "w")
             f.write(points[1])
-            f.close()
-         '''   
-            
+            f.close()'''            
+
         
-  
+
 #Main Code###############################
 if __name__=='__main__':
   #print('__name__ is ',__name__,',so running code')
@@ -195,5 +235,5 @@ if __name__=='__main__':
       m.archive_file()
     time.sleep(1)
     #break; #useful during debugging
-  
+ 
     
