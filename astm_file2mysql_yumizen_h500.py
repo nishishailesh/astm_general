@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys
+import sys, io
 import logging
 import time
 import zlib
@@ -8,6 +8,9 @@ import astm_file2mysql_general as astmg
 import zlib
 import base64
 import struct
+import matplotlib.pyplot as plt 
+import numpy as np 
+import datetime
 
 #to ensure that password is not in main sources
 #prototype file is as follows
@@ -79,6 +82,66 @@ def mk_num_tuple_from_def_base_byte_str(def_base_byte_str):
     count=count+4
   return num_tuple
 
+def mk_histogram_from_tuple(xy,heading,x_axis,y_axis,axis_range_tuple):
+  #print(x)
+  #print(y)
+  plt.plot(xy[0], xy[1]) 
+  plt.xlabel(x_axis) 
+  plt.ylabel(y_axis)
+  plt.axis(axis_range_tuple) 
+  plt.title('HISTOGRAM: '+heading) 
+  f = io.BytesIO()
+  plt.savefig(f, format='png')
+  f.seek(0)
+  data=f.read()
+  f.close()
+  plt.close()	#otherwise graphs will be overwritten, in next loop
+  return data
+
+def mk_matrix_from_tuple(xy,heading,x_axis,y_axis,axis_range_tuple):
+  #print(x)
+  #print(y)
+  '''
+  0 for LYM box
+  1 for MON box
+  2 for NEU box
+  3 for EOS box
+  4 for LIC box
+  5 for ALY box
+  6 for LL box
+  7 for RN box
+  8 for RM box
+  '''
+  colors=('blue','green','red','cyan','#8B6914','#FB00EF','#1E90FF','#FFA500','#95FC01')
+  plt.text(0,axis_range_tuple[3]-axis_range_tuple[1]*0.05,' LYM',color=colors[0])
+  plt.text(0,axis_range_tuple[3]-axis_range_tuple[1]*0.10,' MON',color=colors[1])
+  plt.text(0,axis_range_tuple[3]-axis_range_tuple[1]*0.15,' NEU',color=colors[2])
+  plt.text(0,axis_range_tuple[3]-axis_range_tuple[1]*0.20,' EOS',color=colors[3])
+  plt.text(0,axis_range_tuple[3]-axis_range_tuple[1]*0.25,' LIC',color=colors[4])
+  plt.text(0,axis_range_tuple[3]-axis_range_tuple[1]*0.30,' ALY',color=colors[5])
+  plt.text(0,axis_range_tuple[3]-axis_range_tuple[1]*0.35,' LL',color=colors[6])
+  plt.text(0,axis_range_tuple[3]-axis_range_tuple[1]*0.40,' RN',color=colors[7])
+  plt.text(0,axis_range_tuple[3]-axis_range_tuple[1]*0.45,' RM',color=colors[8])
+  
+
+  for i in range(0,len(xy[0])):
+    try:
+      color=colors[int(xy[3][i])]
+    except Exception as my_ex:
+      color='black'
+    plt.plot(xy[0][i], xy[1][i],'ro',markersize=1,color=color) 
+    
+  plt.xlabel(x_axis) 
+  plt.ylabel(y_axis)
+  plt.axis(axis_range_tuple) 
+  plt.title('MATRIX: '+heading) 
+  f = io.BytesIO()
+  plt.savefig(f, format='png')
+  f.seek(0)
+  data=f.read()
+  f.close()
+  plt.close()	#otherwise graphs will be overwritten, in next loop
+  return data
 
 class yumizenp500(astmg.astm_file):
 
@@ -98,13 +161,45 @@ class yumizenp500(astmg.astm_file):
         "MCH":(6,1),
         "MCHC":(7,1),
         "HCT":(4,1),
-        "EOS%":(41,1)
+        "EOS%":(41,1),
+        "RbcAlongRes":(22,1),
+        "PltAlongRes":(23,1),
+        "LMNEResAbs":(24,1)
     }
   def mk_sql(self):
     for each_sample in self.final_data:
       msg='sample_id is {}'.format(each_sample[0])
       sample_id=each_sample[0]
       logging.debug(msg)
+
+      if(sample_id.rstrip(' ').isnumeric() == False):
+        logging.debug('\033[0;31msample_id is not number\033[0m')
+        return False;
+      
+      ####main sql edit as per your need####
+      #reuse sql
+      prepared_sql='insert into primary_result \
+                             (sample_id,examination_id,result,uniq) \
+                             values \
+                             (%s,%s,%s,%s) \
+                             ON DUPLICATE KEY UPDATE result=%s'
+
+      prepared_sql_blob='insert into primary_result_blob \
+                             (sample_id,examination_id,result,uniq) \
+                             values \
+                             (%s,%s,%s,%s) \
+                             ON DUPLICATE KEY UPDATE result=%s'
+      
+      #56, remark, once only, no uniq value      
+      data_tpl=(
+                       sample_id,\
+                       56,\
+                       'Done on automated Yumizen H500',\
+                       '',\
+                       'Done on automated Yumizen H500'
+                     )           
+      self.run_query(my_host,my_user,my_pass,my_db,prepared_sql,data_tpl) 
+              
       for each_result in each_sample[1]:
         if(each_result[0]=='R'):
           msg='Examination: {} --> Result  {}'.format(each_result[2],each_result[3])
@@ -115,31 +210,11 @@ class yumizenp500(astmg.astm_file):
           ex_name=examination_name_tuple[3]
           ex_result=each_result[3]
           uniq=each_result[11]
+          uniq_for_M=uniq
           msg='(sid,eid,res,uniq)= ({} , {} , {}, {})'.format(sample_id,ex_name,ex_result,uniq)
           logging.debug(msg)
-          
-          
-          ####main sql edit as per your need####
-          #reuse sql
-          prepared_sql='insert into primary_result \
-                             (sample_id,examination_id,result,uniq) \
-                             values \
-                             (%s,%s,%s,%s) \
-                             ON DUPLICATE KEY UPDATE result=%s'
 
           if(ex_name in self.yumizon_to_lis):
-
-            '''
-            #how to view sql , for troubleshooting
-            pr_prepared_sql="insert into primary_result \
-                             (sample_id,examination_id,result,uniq) \
-                             values \
-                             ('{}','{}','{}','{}') \
-                             ON DUPLICATE KEY UPDATE result='{}'".format(\
-                             sample_id,self.yumizon_to_lis[ex_name][0], ex_result*self.yumizon_to_lis[ex_name][1] ,uniq,ex_result)
-            print(pr_prepared_sql)
-            '''
-
             data_tpl=(
                        sample_id,\
                        self.yumizon_to_lis[ex_name][0],\
@@ -149,38 +224,26 @@ class yumizenp500(astmg.astm_file):
                      )
             
             self.run_query(my_host,my_user,my_pass,my_db,prepared_sql,data_tpl)
-            
-            
-          #56, remark
-          data_tpl=(
-                       sample_id,\
-                       56,\
-                       'Done on automated Yumizen H500',\
-                       uniq,\
-                       'Done on automated Yumizen H500'
-                     )
-            
-          self.run_query(my_host,my_user,my_pass,my_db,prepared_sql,data_tpl)            
-          
+                      
         
         elif(each_result[0]=='M'):
           #print(each_result)
           msg_type=each_result[2]
-          if(msg_type=='HISTOGRAM'):
+          if(msg_type=='HISTOGRAM' or msg_type=='MATRIX'):
             points=each_result[6].split(self.s3)
             num_tuple=mk_num_tuple_from_def_base_byte_str(points[1])
-            print(num_tuple)
-            print('Histogram details')
+            #print(num_tuple)
+            #print('Histogram details'+each_result[4])
             x_display_min=num_tuple[0]
-            print('x_display_min=' , x_display_min)
+            #print('x_display_min=' , x_display_min)
             x_display_max=num_tuple[1]
-            print('x_display_max=' , x_display_max)
+            #print('x_display_max=' , x_display_max)
             y_display_min=num_tuple[2]
-            print('y_display_min=' , y_display_min)
+            #print('y_display_min=' , y_display_min)
             y_display_max=num_tuple[3]
-            print('y_display_max=' , y_display_max)
+            #print('y_display_max=' , y_display_max)
             x_tick_num=int(num_tuple[4])
-            print('x_tick_num=' , x_tick_num)
+            #print('x_tick_num=' , x_tick_num)
             
             start_cur=5
             end_cur=start_cur + x_tick_num
@@ -189,11 +252,11 @@ class yumizenp500(astmg.astm_file):
             #for range(5,5) it does nothing
             for cur in range(start_cur,end_cur):           
               xtk=xtk+(num_tuple[cur],)
-            print('xtk values=' , xtk)
+            #print('xtk values=' , xtk)
 
 
             y_tick_num=int(num_tuple[end_cur])
-            print('y_tick_num=' , y_tick_num)
+            #print('y_tick_num=' , y_tick_num)
             
             start_cur=end_cur+1
             end_cur=start_cur + y_tick_num
@@ -202,26 +265,61 @@ class yumizenp500(astmg.astm_file):
             #for range(5,5) it does nothing
             for cur in range(start_cur,end_cur):           
               ytk=ytk+(num_tuple[cur],)
-            print('ytk values=' , ytk)
+            #print('ytk values=' , ytk)
 
             num_of_list=int(num_tuple[end_cur])
-            print('num_of_list=' , num_of_list)
+            #print('num_of_list=' , num_of_list)
 
             list_length=int(num_tuple[end_cur+1])
-            print('list_length=' , list_length)
-              
-          '''elif(msg_type=='HISTOGRAM' or  msg_type=='MATRIX' ):
-            points=each_result[6].split(self.s3)
-            print(points[1])
-            msg='Msg_type: {} MsType: {} Name: {} --> Thresold  {}'.format(msg_type, each_result[3],each_result[4],each_result[5])
-            logging.debug(msg) 
-            #print (zlib.decompress(points[1].encode()))
-            f = open(each_result[4], "w")
-            f.write(points[1])
-            f.close()'''            
+            #print('list_length=' , list_length)
+            
+            start_list=end_cur+2
+            xy_list=()
+            
+            for list_index in range(0,num_of_list):
+              end_list=start_list+list_length
+              xy_list=xy_list + ( (num_tuple[start_list:end_list]), )
+              start_list=start_list+list_length
+            #print('xy_list=', xy_list)
+            
+            #print('making graph...')            
+            if(msg_type=='HISTOGRAM'):
+              png=b''
+              axis_range_tuple=(x_display_min,x_display_max,y_display_min,y_display_max)
+              png=mk_histogram_from_tuple(xy_list,each_result[4],
+                                'Cell volume (fL)','Cell Count(x10^3)',axis_range_tuple)
+                                
+            elif(msg_type=='MATRIX'):
+              cell_types = np.array(xy_list[3]) 
+              unique_cell_types=tuple(np.unique(cell_types))
+              #print(unique_cell_types)           
+              png=b''
+              axis_range_tuple=(x_display_min,x_display_max,y_display_min,y_display_max)              
+              png=mk_matrix_from_tuple(xy_list,each_result[4],
+                                'Cell volume (fL)','Absorbance',axis_range_tuple)
 
-        
+            #to write png in current folder, for debugging only
+            #fl=open(sample_id+'_'+each_result[4]+'_hg.png','wb')
+            #fl.write(png)
+            #fl.close()
 
+            
+            #RbcAlongRes PltAlongRes LMNEResAbs are each_result[4] (unlike 'R' record where it is each_result[2]
+            #no uniq date time, so uniq of R is used
+            
+            dt=datetime.datetime.now()
+            uniq=dt.strftime("%Y-%m-%d-%H-%M-%S") #not actual time, but time when script is run, no datetime in M record
+            
+            data_tpl=(
+                       sample_id,\
+                       self.yumizon_to_lis[each_result[4]][0],\
+                       png,\
+                       uniq,\
+                       png
+                     )
+            
+            self.run_query(my_host,my_user,my_pass,my_db,prepared_sql_blob,data_tpl)
+          
 #Main Code###############################
 if __name__=='__main__':
   #print('__name__ is ',__name__,',so running code')
@@ -231,7 +329,6 @@ if __name__=='__main__':
       m.analyse_file()
       m.mk_tuple()
       m.mk_sql()
-      m.send_to_mysql()
       m.archive_file()
     time.sleep(1)
     #break; #useful during debugging

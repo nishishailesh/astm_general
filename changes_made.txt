@@ -1,0 +1,10 @@
+INSERT INTO `examination` (`examination_id`, `name`, `sample_requirement`, `edit_specification`, `description`) VALUES
+(22, 'RBC Histogram', 'EDTA-Blood-HI', '{\"type\":\"blob\",\"img\":\"png\",\"width\":\"300\",\"height\":\"200\"}', '5P'),
+(23, 'Platelet Histogram', 'EDTA-Blood-HI', '{\"type\":\"blob\",\"img\":\"png\",\"width\":\"300\",\"height\":\"200\"}', '5P'),
+(24, 'WBC Matrix', 'EDTA-Blood-HI', '{\"type\":\"blob\",\"img\":\"png\",\"width\":\"300\",\"height\":\"200\"}', '5P');
+
+INSERT INTO `profile` (`profile_id`, `name`, `examination_id_list`, `extra`, `edit_specification`) VALUES
+(232, '5Part Graphs', '22,23,24', '', '{\"display_name\":\"no\",\"header\":\"no\",\"print_hide\":\"no\",\"print_style\":\"vertical\"}');
+
+
+differencial decimal 0.1
