@@ -173,7 +173,7 @@ class yumizenp500(astmg.astm_file):
       logging.debug(msg)
 
       if(sample_id.rstrip(' ').isnumeric() == False):
-        logging.debug('\033[0;31msample_id is not number\033[0m')
+        logging.debug('sample_id is not number')
         return False;
       
       ####main sql edit as per your need####
@@ -214,8 +214,9 @@ class yumizenp500(astmg.astm_file):
           msg='(sid,eid,res,uniq)= ({} , {} , {}, {})'.format(sample_id,ex_name,ex_result,uniq)
           logging.debug(msg)
 
-          if(ex_name in self.yumizon_to_lis):
-            data_tpl=(
+          try:
+            if(ex_name in self.yumizon_to_lis):
+              data_tpl=(
                        sample_id,\
                        self.yumizon_to_lis[ex_name][0],\
                        float(ex_result)*self.yumizon_to_lis[ex_name][1],\
@@ -223,8 +224,12 @@ class yumizenp500(astmg.astm_file):
                        float(ex_result)*self.yumizon_to_lis[ex_name][1]
                      )
             
-            self.run_query(my_host,my_user,my_pass,my_db,prepared_sql,data_tpl)
-                      
+              self.run_query(my_host,my_user,my_pass,my_db,prepared_sql,data_tpl)
+          except Exception as my_ex:
+            logging.debug(my_ex)
+            logging.debug('\033[0;31mresult of ('+ex_result+') can not be converted to float for multiplication?\033[0m')
+            continue
+                
         
         elif(each_result[0]=='M'):
           #print(each_result)
