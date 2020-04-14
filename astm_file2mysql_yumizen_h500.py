@@ -8,6 +8,9 @@ import astm_file2mysql_general as astmg
 import zlib
 import base64
 import struct
+
+#apt search python3-matplotlib
+#apt install python3-matplotlib
 import matplotlib.pyplot as plt 
 import numpy as np 
 import datetime

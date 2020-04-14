@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import os
 import sys
+#apt install python3-mysqldb
 import MySQLdb
 import time
 import logging
@@ -348,8 +349,8 @@ if __name__=='__main__':
     if(m.get_first_file()):
       m.analyse_file()
       m.mk_tuple()
-      m.send_to_mysql()
-      m.archive_file()
+      #m.send_to_mysql() #specific for each equipment/lis
+      m.archive_file() #comment, useful during debugging
     time.sleep(1)
     #break; #useful during debugging
 '''  
