@@ -12,7 +12,7 @@ import fcntl
 
 #classes#################################
 class astm_file(object):
-  def run_query(self,my_host,my_user,my_pass,my_db,prepared_sql,data_tpl):
+  def get_link(self,my_host,my_user,my_pass,my_db):
     con=MySQLdb.connect(my_host,my_user,my_pass,my_db)
     logging.debug(con)
     if(con==None):
@@ -20,10 +20,21 @@ class astm_file(object):
     else:
       pass
       logging.debug('connected')
+      return con
+      
+  def run_query(self,con,prepared_sql,data_tpl): 
     cur=con.cursor()
     cur.execute(prepared_sql,data_tpl)
     con.commit()
+    msg="rows affected: {}".format(cur.rowcount)
+    logging.debug(msg)
     return cur
+
+  def close_cursor(self,cur):
+    cur.close()
+
+  def close_link(self,con):
+    con.close()
     
   def __init__(self,inbox_folder,archived_folder):
     self.inbox=inbox_folder

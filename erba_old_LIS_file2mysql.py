@@ -60,11 +60,16 @@ if log==0:
 
 class old_LIS(astmg.astm_file):
   def send_to_mysql(self):
+    con=self.get_link(my_host,my_user,my_pass,my_db)
     prepared_sql='update examination set result=%s where sample_id=%s and code=%s'
     for each_sample in self.final_data:
       sample_id=each_sample[0]
       logging.debug(sample_id)
-      
+
+      if(sample_id.rstrip(' ').isnumeric() == False):
+        logging.debug('sample_id is not number')
+        return False;
+              
       for each_record in each_sample[1]:
         logging.debug(each_record)
         if(each_record[0]=='R'):
@@ -74,13 +79,15 @@ class old_LIS(astmg.astm_file):
           logging.debug(msg)
           data_tpl=(ex_result,sample_id,ex_code)
           try:          
-            self.run_query(my_host,my_user,my_pass,my_db,prepared_sql,data_tpl)
+            cur=self.run_query(con,prepared_sql,data_tpl)
             msg='update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
-            logging.critical(msg)
+            logging.debug(msg)
+            logging.debug(cur)
+            self.close_cursor(cur)
           except:
             msg='update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
             logging.critical(msg)
-          
+    self.close_link(con)
 while True:
   m=old_LIS(inbox,archived)
   if(m.get_first_file()):

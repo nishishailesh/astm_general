@@ -170,6 +170,7 @@ class yumizenp500(astmg.astm_file):
         "LMNEResAbs":(24,1)
     }
   def mk_sql(self):
+    con=self.get_link(my_host,my_user,my_pass,my_db)                              
     for each_sample in self.final_data:
       msg='sample_id is {}'.format(each_sample[0])
       sample_id=each_sample[0]
@@ -200,9 +201,11 @@ class yumizenp500(astmg.astm_file):
                        'Done on automated Yumizen H500',\
                        '',\
                        'Done on automated Yumizen H500'
-                     )           
-      self.run_query(my_host,my_user,my_pass,my_db,prepared_sql,data_tpl) 
-              
+                     )
+                     
+      cur=self.run_query(con,prepared_sql,data_tpl) 
+      self.close_cursor(cur)
+      
       for each_result in each_sample[1]:
         if(each_result[0]=='R'):
           msg='Examination: {} --> Result  {}'.format(each_result[2],each_result[3])
@@ -227,7 +230,8 @@ class yumizenp500(astmg.astm_file):
                        float(ex_result)*self.yumizon_to_lis[ex_name][1]
                      )
             
-              self.run_query(my_host,my_user,my_pass,my_db,prepared_sql,data_tpl)
+              cur=self.run_query(con,prepared_sql,data_tpl) 
+              self.close_cursor(cur)
           except Exception as my_ex:
             logging.debug(my_ex)
             logging.debug('\033[0;31mresult of ('+ex_result+') can not be converted to float for multiplication?\033[0m')
@@ -325,8 +329,9 @@ class yumizenp500(astmg.astm_file):
                        uniq,\
                        png
                      )
-            
-            self.run_query(my_host,my_user,my_pass,my_db,prepared_sql_blob,data_tpl)
+            cur=self.run_query(con,prepared_sql_blob,data_tpl) 
+            self.close_cursor(cur)
+    self.close_link(con)        
           
 #Main Code###############################
 if __name__=='__main__':
