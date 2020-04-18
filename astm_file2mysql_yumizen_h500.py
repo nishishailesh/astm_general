@@ -167,7 +167,8 @@ class yumizenp500(astmg.astm_file):
         "EOS%":(41,1),
         "RbcAlongRes":(22,1),
         "PltAlongRes":(23,1),
-        "LMNEResAbs":(24,1)
+        "LMNEResAbs":(24,1),
+        "WbcAlongRes":(25,1)
     }
   def mk_sql(self):
     con=self.get_link(my_host,my_user,my_pass,my_db)                              
