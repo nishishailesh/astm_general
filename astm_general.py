@@ -14,7 +14,8 @@ import fcntl
 
 #tcp ->uncomment as needed
 connection_type='tcp'
-host_address='10.206.10.26'
+#host_address='10.206.10.26'
+host_address='11.207.1.1'
 host_port='2575'
 
 ############################
@@ -23,9 +24,10 @@ host_port='2575'
 
 s=None
 x=None
-logfile_name='/var/log/astm_general.log'
+logfile_name='/var/log/XL640_astm_general.log'
 log=1	#0=disable anyother=enable
-output_folder='/root/yumizen_h500.data/' #remember ending/
+#output_folder='/root/yumizen_h500.data/' #remember ending/
+output_folder='/root/XL640.data/' #remember ending/
 alarm_time=10
 
 ################################################

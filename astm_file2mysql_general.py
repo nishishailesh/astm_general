@@ -30,6 +30,9 @@ class astm_file(object):
     logging.debug(msg)
     return cur
 
+  def get_single_row(self,cur):
+    return cur.fetchone()
+    
   def close_cursor(self,cur):
     cur.close()
 

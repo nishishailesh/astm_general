@@ -11,8 +11,8 @@ import struct
 
 #apt search python3-matplotlib
 #apt install python3-matplotlib
-import matplotlib.pyplot as plt 
-import numpy as np 
+#import matplotlib.pyplot as plt 
+#import numpy as np 
 import datetime
 
 #to ensure that password is not in main sources
@@ -236,101 +236,7 @@ class yumizenp500(astmg.astm_file):
             logging.debug(my_ex)
             logging.debug('\033[0;31mresult of ('+ex_result+') can not be converted to float for multiplication?\033[0m')
             continue
-                
-        
-        elif(each_result[0]=='M'):
-          #print(each_result)
-          msg_type=each_result[2]
-          if(msg_type=='HISTOGRAM' or msg_type=='MATRIX'):
-            points=each_result[6].split(self.s3)
-            num_tuple=mk_num_tuple_from_def_base_byte_str(points[1])
-            #print(num_tuple)
-            #print('Histogram details'+each_result[4])
-            x_display_min=num_tuple[0]
-            #print('x_display_min=' , x_display_min)
-            x_display_max=num_tuple[1]
-            #print('x_display_max=' , x_display_max)
-            y_display_min=num_tuple[2]
-            #print('y_display_min=' , y_display_min)
-            y_display_max=num_tuple[3]
-            #print('y_display_max=' , y_display_max)
-            x_tick_num=int(num_tuple[4])
-            #print('x_tick_num=' , x_tick_num)
-            
-            start_cur=5
-            end_cur=start_cur + x_tick_num
-            xtk=()
-            
-            #for range(5,5) it does nothing
-            for cur in range(start_cur,end_cur):           
-              xtk=xtk+(num_tuple[cur],)
-            #print('xtk values=' , xtk)
 
-
-            y_tick_num=int(num_tuple[end_cur])
-            #print('y_tick_num=' , y_tick_num)
-            
-            start_cur=end_cur+1
-            end_cur=start_cur + y_tick_num
-            ytk=()
-            
-            #for range(5,5) it does nothing
-            for cur in range(start_cur,end_cur):           
-              ytk=ytk+(num_tuple[cur],)
-            #print('ytk values=' , ytk)
-
-            num_of_list=int(num_tuple[end_cur])
-            #print('num_of_list=' , num_of_list)
-
-            list_length=int(num_tuple[end_cur+1])
-            #print('list_length=' , list_length)
-            
-            start_list=end_cur+2
-            xy_list=()
-            
-            for list_index in range(0,num_of_list):
-              end_list=start_list+list_length
-              xy_list=xy_list + ( (num_tuple[start_list:end_list]), )
-              start_list=start_list+list_length
-            #print('xy_list=', xy_list)
-            
-            #print('making graph...')            
-            if(msg_type=='HISTOGRAM'):
-              png=b''
-              axis_range_tuple=(x_display_min,x_display_max,y_display_min,y_display_max)
-              png=mk_histogram_from_tuple(xy_list,each_result[4],
-                                'Cell volume (fL)','Cell Count(x10^3)',axis_range_tuple)
-                                
-            elif(msg_type=='MATRIX'):
-              cell_types = np.array(xy_list[3]) 
-              unique_cell_types=tuple(np.unique(cell_types))
-              #print(unique_cell_types)           
-              png=b''
-              axis_range_tuple=(x_display_min,x_display_max,y_display_min,y_display_max)              
-              png=mk_matrix_from_tuple(xy_list,each_result[4],
-                                'Cell volume (fL)','Absorbance',axis_range_tuple)
-
-            #to write png in current folder, for debugging only
-            #fl=open(sample_id+'_'+each_result[4]+'_hg.png','wb')
-            #fl.write(png)
-            #fl.close()
-
-            
-            #RbcAlongRes PltAlongRes LMNEResAbs are each_result[4] (unlike 'R' record where it is each_result[2]
-            #no uniq date time, so uniq of R is used
-            
-            dt=datetime.datetime.now()
-            uniq=dt.strftime("%Y-%m-%d-%H-%M-%S") #not actual time, but time when script is run, no datetime in M record
-            
-            data_tpl=(
-                       sample_id,\
-                       self.yumizon_to_lis[each_result[4]][0],\
-                       png,\
-                       uniq,\
-                       png
-                     )
-            cur=self.run_query(con,prepared_sql_blob,data_tpl) 
-            self.close_cursor(cur)
     self.close_link(con)        
           
 #Main Code###############################
