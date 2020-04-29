@@ -117,7 +117,20 @@ def get_port():
   elif(connection_type=='tcp'):
     global s 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        
+    """Set TCP keepalive on an open socket.
+    It activates after 1 second (after_idle_sec) of idleness,
+    then sends a keepalive ping once every 3 seconds (interval_sec),
+    and closes the connection after 5 failed ping (max_fails), or 15 seconds
+    """    
+    s.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE, 1)
+ 
+    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
+    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 3)
+    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5)
+    
     try:
       s.bind((host_address,int(host_port)))	#it is a tuple
     except:
@@ -143,8 +156,13 @@ def my_read(port):
   if(connection_type=='tty'):
     return port.read(1)
   elif(connection_type=='tcp'):
-    return port.recv(1)
-
+    try:
+      return port.recv(1)
+    except Exception as my_ex:
+      logging.debug(my_ex)
+      logging.debug('Network disconnection??')
+      return b''
+      
 def my_write(port,byte):
   if(connection_type=='tty'):
     return port.write(byte)
@@ -220,4 +238,4 @@ while True:
       logging.debug(my_ex)
       
     byte_array=[]							#empty array      
-    logging.debug('<EOT> received. array( only EOF remaining ) written to file. File closed:')
+    logging.debug('<EOT> received. array( only EOT remaining ) written to file. File closed:')
