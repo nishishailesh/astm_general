@@ -113,12 +113,16 @@ class new_LIS(astmg.astm_file):
           ex_result=each_record[3]
           examination_id=self.get_eid_for_sid_code(con,sample_id,ex_code)
           #examination_id is a tuple of single id
+          if(len(examination_id)!=1):
+            msg="Number of examination_id found is {}. only 1 is acceptable".format(len(examination_id))
+            logging.debug(msg)
+            continue
           msg='{}={}'.format(examination_id[0],ex_result)
           logging.debug(msg)
           data_tpl=(ex_result,sample_id,examination_id[0])
           try:          
             cur=self.run_query(con,prepared_sql,data_tpl)
-            
+ 
             msg=prepared_sql
             logging.debug(msg)
             msg=data_tpl
