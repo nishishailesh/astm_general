@@ -63,6 +63,9 @@ class new_LIS(astmg.astm_file):
     logging.debug(sid)
     prepared_sql='select examination_id from result where sample_id=%s'
     data_tpl=(sid,)
+    logging.debug(prepared_sql)
+    logging.debug(data_tpl)
+
     cur=self.run_query(con,prepared_sql,data_tpl)
     
     eid_tpl=()
@@ -72,7 +75,25 @@ class new_LIS(astmg.astm_file):
       eid_tpl=eid_tpl+(data[0],)
       data=self.get_single_row(cur)
     logging.debug(eid_tpl)
-    return False
+    
+
+    prepared_sqlc='select examination_id from host_code where code=%s and equipment=\'XL_640\''
+    data_tplc=(ex_code,)
+    logging.debug(prepared_sqlc)
+    logging.debug(data_tplc)
+    curc=self.run_query(con,prepared_sqlc,data_tplc)
+    
+    eid_tplc=()
+    datac=self.get_single_row(curc)
+    while datac:
+      logging.debug(datac)
+      eid_tplc=eid_tplc+(datac[0],)
+      datac=self.get_single_row(curc)
+    logging.debug(eid_tplc)
+
+    ex_id=tuple(set(eid_tpl) & set(eid_tplc))
+    logging.debug('final examination id:'+str(ex_id))
+    return ex_id
      
   def send_to_mysql(self):
     con=self.get_link(my_host,my_user,my_pass,my_db)
@@ -91,10 +112,10 @@ class new_LIS(astmg.astm_file):
           ex_code=each_record[2].split(self.s3)[3]
           ex_result=each_record[3]
           examination_id=self.get_eid_for_sid_code(con,sample_id,ex_code)
-          
-          msg='{}={}'.format(examination_id,ex_result)
+          #examination_id is a tuple of single id
+          msg='{}={}'.format(examination_id[0],ex_result)
           logging.debug(msg)
-          data_tpl=(ex_result,sample_id,examination_id)
+          data_tpl=(ex_result,sample_id,examination_id[0])
           try:          
             cur=self.run_query(con,prepared_sql,data_tpl)
             
