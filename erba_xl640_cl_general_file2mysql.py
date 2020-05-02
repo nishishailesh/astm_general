@@ -30,12 +30,13 @@ my_user=astm_var.my_user
 my_pass=astm_var.my_pass
 my_db='cl_general'
 
-#Step:2 Create inbox and archived folders as follows
+#Step:3 Create inbox and archived folders as follows
 inbox='/root/xl640.data/'
 archived='/root/xl640.arch/'
 log_filename='/var/log/xl640.out.log'
+equipment='XL_640'	#for host_code to examination_id translation from tost_code table
 
-#Step:3
+#Step:4
 # run file ./elba_old_LIS_file2mysql.py
 # see out put "tail -f /var/log/ashish.log
 #see database updation in LIS
@@ -77,8 +78,8 @@ class new_LIS(astmg.astm_file):
     logging.debug(eid_tpl)
     
 
-    prepared_sqlc='select examination_id from host_code where code=%s and equipment=\'XL_640\''
-    data_tplc=(ex_code,)
+    prepared_sqlc='select examination_id from host_code where code=%s and equipment=%s'
+    data_tplc=(ex_code,equipment)
     logging.debug(prepared_sqlc)
     logging.debug(data_tplc)
     curc=self.run_query(con,prepared_sqlc,data_tplc)
@@ -93,11 +94,15 @@ class new_LIS(astmg.astm_file):
 
     ex_id=tuple(set(eid_tpl) & set(eid_tplc))
     logging.debug('final examination id:'+str(ex_id))
-    return ex_id
+    if(len(ex_id)!=1):
+      msg="Number of examination_id found is {}. only 1 is acceptable.".format(len(ex_id))
+      logging.debug(msg)
+      return False
+    return ex_id[0]
      
   def send_to_mysql(self):
     con=self.get_link(my_host,my_user,my_pass,my_db)
-    prepared_sql='update result set result=%s where sample_id=%s and examination_id=%s'
+    prepared_sql='update primary_result set result=%s where sample_id=%s and examination_id=%s'
     for each_sample in self.final_data:
       sample_id=each_sample[0]
       logging.debug(sample_id)
@@ -112,14 +117,13 @@ class new_LIS(astmg.astm_file):
           ex_code=each_record[2].split(self.s3)[3]
           ex_result=each_record[3]
           examination_id=self.get_eid_for_sid_code(con,sample_id,ex_code)
-          #examination_id is a tuple of single id
-          if(len(examination_id)!=1):
-            msg="Number of examination_id found is {}. only 1 is acceptable".format(len(examination_id))
-            logging.debug(msg)
+          if(examination_id==False):
+            msg="Skipping the while loop once"
+            logging.warning(msg)
             continue
-          msg='{}={}'.format(examination_id[0],ex_result)
+          msg='{}={}'.format(examination_id,ex_result)
           logging.debug(msg)
-          data_tpl=(ex_result,sample_id,examination_id[0])
+          data_tpl=(ex_result,sample_id,examination_id)
           try:          
             cur=self.run_query(con,prepared_sql,data_tpl)
  
