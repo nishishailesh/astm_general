@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import sys
 import fcntl
+import struct
+import os
 
 #defaults###############
 
@@ -15,8 +17,8 @@ import fcntl
 #tcp ->uncomment as needed
 connection_type='tcp'
 #host_address='10.206.10.26'
-#host_address='11.207.1.1'
 host_address='11.207.1.1'
+#host_address='12.207.3.240'
 host_port='2576'
 
 ############################
@@ -25,11 +27,13 @@ host_port='2576'
 
 s=None
 x=None
-logfile_name='/var/log/xl1000.in.log'
+logfile_name='/var/log/xl1000.astm.log'
 log=1	#0=disable anyother=enable
 #output_folder='/root/yumizen_h500.data/' #remember ending/
-output_folder='/root/xl1000.data/' #remember ending/
+output_folder='/root/xl1000.data.from.equipment/' #remember ending/
+input_folder='/root/xl1000.data.from.host/' #remember ending/
 alarm_time=10
+status='GET_ENQ_SEND_ENQ'
 
 ################################################
 
@@ -85,21 +89,38 @@ elif(connection_type=='tcp'):
 def signal_handler(signal, frame):
   global x									#global file open
   global byte_array							#global array of byte
-  logging.debug('Alarm stopped')
+  global status
+  msg='Alarm stopped status={}'.format(status)
+  logging.debug(msg)
   sgl='signal:'+str(signal)
   logging.debug(sgl)
   logging.debug(frame)
   
-  try:
-    if x!=None:
-      x.write(''.join(byte_array))			#write to file everytime LF received, to prevent big data memory problem
-      x.close()
-  except Exception as my_ex:
-    logging.debug(my_ex)
-    
-  byte_array=[]							#empty array      
-  logging.debug('Alarm.... <EOT> NOT received. data may be incomplate')
+  if(status=='GET_ENQ_SEND_ENQ'):
+    logging.debug('Normal Read Break to see if any write work pending')
 
+  
+  else:
+    msg='Alarm stopped previous status={}'.format(status)    
+    logging.debug(msg)
+    status='GET_ENQ_SEND_ENQ'
+    msg='Noe new status={}'.format(status)    
+    logging.debug(msg)
+ 
+  '''   
+  if(status!='GET_ENQ_SEND_ENQ'):
+    try:
+      if x!=None:
+        x.write(''.join(byte_array))			#write to file everytime LF received, to prevent big data memory problem
+        x.close()
+    except Exception as my_ex:
+      logging.debug(my_ex)
+    
+    byte_array=[]							#empty array      
+    logging.debug('Alarm.... <EOT> NOT received. data may be incomplate')
+  '''
+      
+    
 def get_filename():
   dt=datetime.datetime.now()
   return output_folder+dt.strftime("%Y-%m-%d-%H-%M-%S-%f")
@@ -107,7 +128,7 @@ def get_filename():
 def get_port():
   if(connection_type=='tty'):
     try:
-      port = serial.Serial(input_tty, baudrate=9600)
+      port = serial.Serial(input_tty, baudrate=9600)	#if read() donot get its byte in 2 seconds it return
       return port
     except:
       exception_return = sys.exc_info()
@@ -131,7 +152,7 @@ def get_port():
     s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
     s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 3)
     s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5)
-    
+      
     try:
       s.bind((host_address,int(host_port)))	#it is a tuple
     except:
@@ -147,9 +168,9 @@ def get_port():
  
     logging.debug('Waiting for connection from a client....')   
     conn_tuple = s.accept()	#This waits till connected
-   
     logging.debug('Client request received. Listening+ Accepting Socket (conn_tuple) details below:')
     logging.debug(conn_tuple)
+    conn_tuple[0].setblocking(0)  #also when recv() get b''
     
     return conn_tuple[0]
   
@@ -160,15 +181,38 @@ def my_read(port):
     try:
       return port.recv(1)
     except Exception as my_ex:
-      logging.debug(my_ex)
-      logging.debug('Network disconnection??')
-      return b''
+      #logging.debug(my_ex)
+      #msg='Network disconnection?? non-blocking read status={}'.format(status)
+      #logging.debug(msg)
+      #return b''	#nonblocking should not return false
+      time.sleep(1)  #otherwise high CPU use in nonblocking read
+      return False
       
 def my_write(port,byte):
   if(connection_type=='tty'):
     return port.write(byte)
   elif(connection_type=='tcp'):
     return port.send(byte)
+
+    
+def get_first_file():
+  inbox_files=os.listdir(input_folder)
+  for each_file in inbox_files:
+    if(os.path.isfile(input_folder+each_file)):
+      current_file=each_file
+      msg='File in queue is: '+current_file
+      logging.debug(msg)
+      try:
+        fh=open(input_folder+current_file,'rb')
+        fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return input_folder+current_file 
+      except Exception as my_ex:
+        logging.debug(my_ex)
+        msg="{} is locked. trying next..".format(input_folder+current_file)
+        logging.warning(msg)
+
+  return False  #no file to read
+
 #main loop##########################
 if log==0:
   logging.disable(logging.CRITICAL)
@@ -181,6 +225,7 @@ byte_array=[]								#initialized to ensure that first byte can be added
 #while byte!=b'':							#removed, EOF should not exit program
 while True:
   byte=my_read(port)
+
   if(byte==b''):
     logging.debug('<EOF> reached. Connection broken: details below')
     #<EOF> never reached with tty unless the device is not existing)
@@ -192,7 +237,9 @@ while True:
       logging.debug('(From While) Client request received. Listening+ Accepting Socket (conn_tuple) details below:')
       logging.debug(conn_tuple)
       port=conn_tuple[0]
-    
+      port.setblocking(0)
+  elif(byte==False):
+    pass   #this is due to nonblocking recv
   else:
     byte_array=byte_array+[chr(ord(byte))]	#add everything read to array, if not EOF. EOF have no ord
     logging.debug(ord(byte))
@@ -208,10 +255,16 @@ while True:
     x=open(cur_file,'w')					#open file
     fcntl.flock(x, fcntl.LOCK_EX | fcntl.LOCK_NB)   #lock file
 
+    status='GET_MSG_INCOMPLATE'
+    msg='<ENQ> received. <ACK> Sent. status={}'.format(status)
+    logging.debug(msg)
+
+    msg='Name of File opened to save data:={}'.format(str(cur_file))    
+    logging.debug(msg)
     
-    logging.debug('<ENQ> received. <ACK> Sent. Name of File opened to save data:'+str(cur_file))
     signal.alarm(alarm_time)
     logging.debug('post-enq-ack Alarm started to receive other data')
+    
   elif(byte==b'\x0a'):
     signal.alarm(0)
     logging.debug('Alarm stopped. LF received')
@@ -222,7 +275,11 @@ while True:
     except Exception as my_ex:
       logging.debug(my_ex)
       logging.debug('Tried to write to a non-existant file??')
-    logging.debug('<LF> received. <ACK> Sent. array written to file. byte_array zeroed')
+    
+    status='GET_MSG_INCOMPLATE'
+    msg='<LF> received. <ACK> Sent. array written to file. byte_array zeroed status={}'.format(status)
+    logging.debug(msg)
+    
     signal.alarm(alarm_time)
     logging.debug('post-lf-ack Alarm started to receive other data')
   elif(byte==b'\x04'):
@@ -238,5 +295,46 @@ while True:
     except Exception as my_ex:
       logging.debug(my_ex)
       
-    byte_array=[]							#empty array      
-    logging.debug('<EOT> received. array( only EOT remaining ) written to file. File closed:')
+    byte_array=[]							#empty array
+    status='GET_ENQ_SEND_ENQ'
+    msg='<EOT> received. array( only EOT remaining ) written to file. File closed: status={}'.format(status)
+    logging.debug(msg)
+    
+  if(byte==b'\x06'):
+
+    if(status=='SEND_MSG_ENQ_SENT'):
+      status='SEND_MSG_ACK1_RECEIVED'
+    if(status=='SEND_MSG_LF_SENT'):
+      status='SEND_MSG_ACK2_RECEIVED'      
+      
+    msg='Received <ACK> from equipment status={}'.format(status)
+    logging.debug(msg)
+    
+    if(status=='SEND_MSG_ACK1_RECEIVED'):
+      msg='Will do something here then sending <LF>...'
+      logging.debug(msg)
+      signal.alarm(0)
+      my_write(port,b'\x0a')
+      signal.alarm(alarm_time)
+      status='SEND_MSG_LF_SENT'
+      msg='post <LF>-sent  alarm started to receive 2nd ACK status={}'.format(status)
+      logging.debug(msg)
+
+    if(status=='SEND_MSG_ACK2_RECEIVED'):
+      signal.alarm(0)
+      my_write(port,b'\x04')
+      status='GET_ENQ_SEND_ENQ'
+      msg='2nd ACK received EOT sent status={}'.format(status)
+
+  if(status=='GET_ENQ_SEND_ENQ'):
+    msg='Trying if there is anything in input_folder: {} to write to equipment status={}'.format(input_folder, status)
+    logging.debug(msg)
+    if(get_first_file()!=False):
+      signal.alarm(0)
+      my_write(port,b'\x05');
+      status='SEND_MSG_ENQ_SENT'
+      msg='Sending <ENQ> to equipment, status={}'.format(status)
+      logging.debug(msg)
+      signal.alarm(alarm_time)
+      logging.debug('post ENQ alarm started to watch for ACK from equipment')    
+      

@@ -102,7 +102,18 @@ class new_LIS(astmg.astm_file):
      
   def send_to_mysql(self):
     con=self.get_link(my_host,my_user,my_pass,my_db)
-    prepared_sql='update primary_result set result=%s where sample_id=%s and examination_id=%s'
+    
+    #Ashish comment this line    
+    #prepared_sql='update primary_result set result=%s where sample_id=%s and examination_id=%s'
+    #following is to be done
+    
+    prepared_sql='insert into primary_result \
+                             (sample_id,examination_id,result,uniq) \
+                             values \
+                             (%s,%s,%s,%s) \
+                             ON DUPLICATE KEY UPDATE result=%s'
+
+    
     for each_sample in self.final_data:
       sample_id=each_sample[0]
       logging.debug(sample_id)
@@ -116,6 +127,9 @@ class new_LIS(astmg.astm_file):
         if(each_record[0]=='R'):
           ex_code=each_record[2].split(self.s3)[3]
           ex_result=each_record[3]
+          
+          #Ashish uniqueness require date and time of different results
+          uniq=each_record[12]
           examination_id=self.get_eid_for_sid_code(con,sample_id,ex_code)
           if(examination_id==False):
             msg="Skipping the while loop once"
@@ -123,7 +137,13 @@ class new_LIS(astmg.astm_file):
             continue
           msg='{}={}'.format(examination_id,ex_result)
           logging.debug(msg)
-          data_tpl=(ex_result,sample_id,examination_id)
+          
+          #Ashish following is commented
+          #data_tpl=(ex_result,sample_id,examination_id)
+          #data_tpl will be as follows
+          
+          data_tpl=(sample_id,examination_id,ex_result,uniq,ex_result)
+          
           try:          
             cur=self.run_query(con,prepared_sql,data_tpl)
  

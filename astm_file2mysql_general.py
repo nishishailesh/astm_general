@@ -86,6 +86,7 @@ class astm_file(object):
         except Exception as my_ex:
          logging.debug(my_ex)
          msg="{} is locked. trying next..".format(self.current_file)
+         logging.debug(msg)
     return False  #no file to read
 
   def analyse_file(self):
