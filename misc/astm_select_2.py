@@ -1,9 +1,16 @@
 #!/usr/bin/python3
 
+
+def print_fd(caption,list_of_sockets):
+  print(caption)
+  for s in list_of_sockets:
+    if s != None:
+      print(s.fileno())
+    
 #With Explanation
 
 #Previous Queue is now queue in debian (small q)
-import select, socket, sys, queue, time, pprint
+import select, socket, sys, queue, time
 
 #socket.AF_INET6 for ipv6
 #socket.SOCK_STREAM for TCP (SOCK_DGRAM fro UDP)
@@ -33,50 +40,72 @@ server.listen(5)
 #other sockets are added in the list after calling accept()
 inputs = [server]
 outputs = []
+errors=[]
+
 #Need explanation
+#{} means it is a set, no duplicate, not ordered (not tuple,not list,not dictionary)
 message_queues = {}
 
-pp = pprint.PrettyPrinter(indent=2)
 
 #inputs is not empty, so, enter the loop
 #for any reason, server-input is to be closed, while loop will exit
 while inputs:
-  #prevent anything else in this main loop except following line
-  #Rest of the things in for loop
-  #Otherwise lots of stdout activity will be seen, each time select is called non-blockinh-ly
-  readable, writable, exceptional = select.select(inputs, outputs, inputs+outputs)
+  #select blocks untill there is activity in one of the fd passed to it
+  print('Just before select()')
+
+  print('monitoring....')
+  print_fd('inputs:',inputs);
+  print_fd('outputs:',outputs);
+  print_fd('errors:',errors);
+  
+  readable, writable, exceptional = select.select(inputs, outputs, errors)
   
   #if server-socket receive any request, it is readable
-  #print('Just exited select()')
+  print('Just exited select()')
   
   #php foreach-as-key-value type of loop
+
+  #print('Monitoring:\nInputs{}\nOutputs{}\n'.format(inputs,outputs))
+  
+  print('Actions occured in....')
+  print_fd('readable:',readable);
+  print_fd('writable:',writable);
+  print_fd('exceptional:',exceptional);
+  #print('Actions occured in:\nreadable{}\nwritable{}\nexceptional{}\n'.format(inputs,outputs,exceptional))
+  
   for s in readable:
-    print('Monitoring:')
-    pp.pprint(inputs)
-    pp.pprint(outputs)
-    #inputs+outputs)
-    print('Attn:')
-    pp.pprint(readable)
-    pp.pprint(writable)
-    pp.pprint(exceptional)
     if s is server:
       connection, client_address = s.accept()
       connection.setblocking(0)
+      
       inputs.append(connection)
+      outputs.append(connection)
+      errors.append(connection)
+      
       message_queues[connection] = queue.Queue()
-      print('Now Monitoring....')
-      pp.pprint(inputs)
-      pp.pprint(outputs)
+      #print('message_queues:',message_queues)
+      print('New Connection made######....')
+      print('Now monitoring....')
+      print_fd('inputs:',inputs);
+      print_fd('outputs:',outputs);
+      print_fd('errors:',errors);
+
     else:
       data = s.recv(1024)
-      print('Received:', data)
+
       if data:
+        print('Received {}\nFrom:fd={}:'.format(data,s.fileno()))        #put data 
         message_queues[s].put(data)
+        #print('message_queues:',message_queues)
+       
         if s not in outputs:
           outputs.append(s)
       else:
+        #select says that it is readable and nothing EOF is obtained, so client have closed
         if s in outputs:
           outputs.remove(s)
+        if s in errors:
+          errors.remove(s)
         inputs.remove(s)
         s.close()
         del message_queues[s]
@@ -85,6 +114,7 @@ while inputs:
   for s in writable:
     try:
       next_msg = message_queues[s].get_nowait()
+      print("Writable",next_msg)
     except queue.Empty:
       outputs.remove(s)
     else:
@@ -96,4 +126,3 @@ while inputs:
       outputs.remove(s)
     s.close()
     del message_queues[s]
-  
