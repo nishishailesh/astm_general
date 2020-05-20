@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import astm_bidirectional_general_conf as conf
+import astm_bidirectional_conf as conf
 import time, logging, socket, select
 
 
