@@ -10,15 +10,15 @@ class astmg(object):
   read_set=set()
   write_set=set()
   error_set=set()
-  
+
   readable=set()
   writable=set()
   exceptional=set()
-  
+
   def print_to_log(self,my_object,special_message):
     self.logger.debug('Start=========')
     self.logger.debug(my_object)
-    self.logger.debug(special_message)   
+    self.logger.debug(special_message)
     self.logger.debug('End=========')
 
   ###################################
@@ -49,7 +49,7 @@ class astmg(object):
           
   def __init__(self):
     logging.basicConfig(filename=conf.log_filename,level=logging.DEBUG)
-    self.logger = logging.getLogger('astm_interactive')
+    self.logger = logging.getLogger('astm_bidirectiona_general')
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     self.s.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE, 1) 

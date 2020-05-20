@@ -19,8 +19,8 @@ class astms(astmg.astmg, file_mgmt):
           #3=2nd ack received
           #4=eot sent
     
-    self.set_inbox(conf.inbox)
-    self.set_outbox(conf.outbox)
+    self.set_inbox(conf.inbox_data,conf.inbox_arch)
+    self.set_outbox(conf.outbox_data,conf.outbox_arch)
 
     super().__init__()
 
@@ -47,7 +47,7 @@ class astms(astmg.astmg, file_mgmt):
       return
     else:
       self.print_to_log('main_status==0','initiate_write() will find some pending work') 
-      
+      self.get_first_inbox_file()
       #self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
       #self.error_set=self.read_set.union(self.write_set)    #update error set
       #self.write_msg=b'REAL initiate_write() override me. send apple, pineapple \n' #set message
