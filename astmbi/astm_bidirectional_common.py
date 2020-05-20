@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import os
+import os, fcntl
 import astm_bidirectional_conf as conf
 
 class my_sql(object):
@@ -51,17 +51,35 @@ class file_mgmt(object):
     self.outbox_arch=outbox_arch
 
   def get_first_inbox_file(self):
+    self.current_inbox_file=''
     inbox_files=os.listdir(self.inbox_data)
     for each_file in inbox_files:
       if(os.path.isfile(self.inbox_data+each_file)):
-        self.current_file=self.inbox_data+each_file
-        self.print_to_log('current file:',self.current_file)
+        self.current_inbox_file=self.inbox_data+each_file
+        self.print_to_log('current inbox  file:',self.current_inbox_file)
         try:
-          fh=open(self.current_file,'rb')
+          fh=open(self.current_inbox_file,'rb')
           fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
           return True
         except Exception as my_ex:
-         msg="{} is locked. trying next..".format(self.current_file)
+         msg="{} is locked. trying next..".format(self.current_inbox_file)
+         self.print_to_log(my_ex,msg)
+    return False  #no file to read
+
+
+  def get_first_outbox_file(self):
+    self.current_outbox_file=''
+    outbox_files=os.listdir(self.outbox_data)
+    for each_file in outbox_files:
+      if(os.path.isfile(self.outbox_data+each_file)):
+        self.current_outbox_file=self.outbox_data+each_file
+        self.print_to_log('current outbox  file:',self.current_outbox_file)
+        try:
+          fh=open(self.current_outbox_file,'rb')
+          fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+          return True
+        except Exception as my_ex:
+         msg="{} is locked. trying next..".format(self.current_outbox_file)
          self.print_to_log(my_ex,msg)
     return False  #no file to read
 
