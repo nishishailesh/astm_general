@@ -42,6 +42,7 @@ class astms(astmg.astmg, file_mgmt):
       
     if(data==b'\x04'):
       self.main_status=0
+      self.send_status=0
       #no need update set write_set
       
     #for sending data
@@ -113,19 +114,21 @@ class astms(astmg.astmg, file_mgmt):
       if(x==2):
         start_chk_counting=True
         continue
-      if(x==3):
-        start_chk_counting=False
-        continue
-      if(x==23):
-        start_chk_counting=False
-        continue
+
       if(start_chk_counting==True):
         checksum=(checksum+x)%256
-        
+
+      if(x==3):
+        start_chk_counting=False
+        #continue
+      if(x==23):
+        start_chk_counting=False
+        #continue
+ 
     two_digit_checksum_string='{:X}'.format(checksum).zfill(2)
     return two_digit_checksum_string
 
-   
+
 #Main Code###############################
 #use this to device your own script
 if __name__=='__main__':

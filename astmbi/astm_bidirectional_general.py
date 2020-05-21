@@ -16,14 +16,14 @@ class astmg(object):
   exceptional=set()
 
   def list_wait(self):
-    self.print_to_log('Waiting for {} , {} , {} '.format(self.read_set,self.write_set,self.error_set),
-      'Received for for {} , {} , {} '.format(self.readable,self.writable,self.exceptional))
+    self.print_to_log('Waiting for {} , {} , {} '.format(list(map(socket.socket.fileno,self.read_set)),list(map(socket.socket.fileno,self.write_set)),list(map(socket.socket.fileno,self.error_set))),
+      'Received for {} , {} , {} '.format(self.readable,self.writable,self.exceptional))
       
   def print_to_log(self,my_object,special_message):
-    self.logger.debug('Start=========')
+    #self.logger.debug('Start=========')
     self.logger.debug(my_object)
     self.logger.debug(special_message)
-    self.logger.debug('End=========')
+    #self.logger.debug('End=========')
 
   ###################################
   #override this function in subclass
@@ -93,9 +93,9 @@ class astmg(object):
     self.error_set=self.read_set.union(self.write_set)
     
     while True:      
-      self.print_to_log('','before select')
+      #self.print_to_log('','before select')
       self.readable, self.writable, self.exceptional = select.select(self.read_set,self.write_set,self.error_set,self.select_timeout)
-      self.print_to_log('','after select')
+      #self.print_to_log('','after select')
       self.list_wait()
       ###if anybody else try to connect, reject it
       if(self.s in self.exceptional):
