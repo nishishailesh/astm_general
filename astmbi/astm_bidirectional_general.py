@@ -16,8 +16,20 @@ class astmg(object):
   exceptional=set()
 
   def list_wait(self):
-    self.print_to_log('Waiting for {} , {} , {} '.format(list(map(socket.socket.fileno,self.read_set)),list(map(socket.socket.fileno,self.write_set)),list(map(socket.socket.fileno,self.error_set))),
-      'Received for {} , {} , {} '.format(self.readable,self.writable,self.exceptional))
+    self.print_to_log('Listening to {} , {} , {} '.
+                    format(
+                            list(map(socket.socket.fileno,self.read_set)),
+                            list(map(socket.socket.fileno,self.write_set)),
+                            list(map(socket.socket.fileno,self.error_set))
+                            ),
+                      'Heard from for {} , {} , {} '.
+                    format(
+                            list(map(socket.socket.fileno,self.readable)),
+                            list(map(socket.socket.fileno,self.writable)),
+                            list(map(socket.socket.fileno,self.exceptional))
+                            )
+                      )
+    #'Received for {} , {} , {} '.format(self.readable,self.writable,self.exceptional))
       
   def print_to_log(self,my_object,special_message):
     #self.logger.debug('Start=========')
@@ -54,7 +66,7 @@ class astmg(object):
   def __init__(self):
     #logging.basicConfig(filename=conf.log_filename,level=logging.CRITICAL)
     logging.basicConfig(filename=conf.log_filename,level=logging.DEBUG)
-    self.logger = logging.getLogger('astm_bidirectiona_general')
+    self.logger = logging.getLogger('astm_bidirectional_general')
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     self.s.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE, 1) 
@@ -136,7 +148,7 @@ class astmg(object):
           
           #2)remove from read list
           
-          #no if:() for read_set because, we reached here due to its present in read_set
+          #no if:() for read_set because, we reached here due to its presence in read_set
           self.read_set.remove(self.conn[0])
           #write list with if exist
           if(self.conn[0] in self.write_set):

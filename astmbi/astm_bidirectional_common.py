@@ -33,15 +33,17 @@ class my_sql(object):
 
 class file_mgmt(object):
   def __init__(self):
-    logging.basicConfig(filename=conf.log_filename,level=logging.DEBUG)
-    self.logger = logging.getLogger('astm_bidirectional_common')
-
+    #logging.basicConfig(filename=conf.log_filename,level=logging.DEBUG)
+    #self.logger = logging.getLogger('astm_bidirectional_common')
+    pass
+    
   def print_to_log(self,my_object,special_message):
-    self.logger.debug('Start=========')
-    self.logger.debug(my_object)
-    self.logger.debug(special_message)
-    self.logger.debug('End=========')
-
+    #self.logger.debug('Start=========')
+    #self.logger.debug(my_object)
+    #self.logger.debug(special_message)
+    #self.logger.debug('End=========')
+    pass
+    
   def set_inbox(self,inbox_data,inbox_arch):
     self.inbox_data=inbox_data
     self.inbox=inbox_arch

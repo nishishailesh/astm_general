@@ -119,6 +119,7 @@ class astms(astmg.astmg, file_mgmt):
     for x in data:
       if(x==2):
         start_chk_counting=True
+        #Exclude from chksum calculation
         continue
 
       if(start_chk_counting==True):
@@ -126,10 +127,10 @@ class astms(astmg.astmg, file_mgmt):
 
       if(x==3):
         start_chk_counting=False
-        #continue
+        #Include in chksum calculation
       if(x==23):
         start_chk_counting=False
-        #continue
+        #Include in chksum calculation
  
     two_digit_checksum_string='{:X}'.format(checksum).zfill(2)
     return two_digit_checksum_string
