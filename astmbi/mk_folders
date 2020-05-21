@@ -1,0 +1,4 @@
+mkdir /root/xl1000.inbox.data/
+mkdir /root/xl1000.inbox.arch/
+mkdir /root/xl1000.outbox.data/
+mkdir /root/xl1000.outbox.arch/

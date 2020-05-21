@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import os, fcntl
+import os, fcntl,shutil
 import astm_bidirectional_conf as conf
 
 class my_sql(object):
@@ -83,6 +83,13 @@ class file_mgmt(object):
          self.print_to_log(my_ex,msg)
     return False  #no file to read
 
-  def get_filename():
+  def get_filename(self):
     dt=datetime.datetime.now()
     return output_folder+dt.strftime("%Y-%m-%d-%H-%M-%S-%f")
+
+  def archive_outbox_file(self):
+    shutil.move(self.current_outbox_file, self.outbox_arch)
+    #pass #useful during debugging
+
+  def archive_inbox_file(self):
+    shutil.move(self.current_inbox_file, self.inbox.arch)

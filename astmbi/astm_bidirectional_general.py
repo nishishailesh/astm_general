@@ -15,6 +15,10 @@ class astmg(object):
   writable=set()
   exceptional=set()
 
+  def list_wait(self):
+    self.print_to_log('Waiting for {} , {} , {} '.format(self.read_set,self.write_set,self.error_set),
+      'Received for for {} , {} , {} '.format(self.readable,self.writable,self.exceptional))
+      
   def print_to_log(self,my_object,special_message):
     self.logger.debug('Start=========')
     self.logger.debug(my_object)
@@ -89,10 +93,10 @@ class astmg(object):
     self.error_set=self.read_set.union(self.write_set)
     
     while True:      
-      #self.print_to_log('','before select')
+      self.print_to_log('','before select')
       self.readable, self.writable, self.exceptional = select.select(self.read_set,self.write_set,self.error_set,self.select_timeout)
-      #self.print_to_log('','after select')
-      
+      self.print_to_log('','after select')
+      self.list_wait()
       ###if anybody else try to connect, reject it
       if(self.s in self.exceptional):
         self.print_to_log(self.s,'some error on socket s. quitting')
@@ -153,9 +157,9 @@ class astmg(object):
       #This is ideal time to start nagging client
         
       #print('lenghts:', len(self.readable), len(self.writable), len(self.exceptional))  
-      if(len(self.readable)==0 and len(self.writable)==0 and len(self.exceptional)==0):
-        self.print_to_log('readable, writable,exceptional are silent','Let me do somethin else')
-        self.initiate_write()  
+      #if(len(self.readable)==0 and len(self.writable)==0 and len(self.exceptional)==0):
+      #  self.print_to_log('readable, writable,exceptional are silent','Let me do somethin else')
+      self.initiate_write()  
           
          
 #Main Code###############################
