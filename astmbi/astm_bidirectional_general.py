@@ -52,6 +52,7 @@ class astmg(object):
     self.write_msg=b'Demo initiate_write() override me. send apple, pineapple \n' #set message
           
   def __init__(self):
+    #logging.basicConfig(filename=conf.log_filename,level=logging.CRITICAL)
     logging.basicConfig(filename=conf.log_filename,level=logging.DEBUG)
     self.logger = logging.getLogger('astm_bidirectiona_general')
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

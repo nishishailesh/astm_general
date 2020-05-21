@@ -35,16 +35,22 @@ class astms(astmg.astmg, file_mgmt):
       self.write_msg=b'\x06'
       self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
       self.error_set=self.read_set.union(self.write_set)    #update error set
-    if(data==b'\x0a'):
+    
+    #difficult
+    #see if last byte of data is LF or not
+    #byte members are int. so int->chr(string) -> to byte
+    #elif( chr( data[ len(data) - 1 ] ).encode() == b'\x0a'):
+    #easy
+    elif(data[-1:] == b'\x0a'):
       self.write_msg=b'\x06'
       self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
       self.error_set=self.read_set.union(self.write_set)    #update error set      
-      
-    if(data==b'\x04'):
+
+    elif(data==b'\x04'):
       self.main_status=0
       self.send_status=0
       #no need update set write_set
-      
+ 
     #for sending data
     if(data==b'\x06'):                  #ACK
       if(self.send_status==1):
