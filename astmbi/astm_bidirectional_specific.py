@@ -35,16 +35,18 @@ class astms(astmg.astmg, file_mgmt):
       self.write_msg=b'\x06'
       self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
       self.error_set=self.read_set.union(self.write_set)    #update error set
-    
+
     #difficult
     #see if last byte of data is LF or not
     #byte members are int. so int->chr(string) -> to byte
     #elif( chr( data[ len(data) - 1 ] ).encode() == b'\x0a'):
     #easy
     elif(data[-1:] == b'\x0a'):
-      
-      if(self.get_first_inbox_file()==True):
-        fd=open(self.current_inbox_file,'wb')
+      if(self.calculate_and_compare_checksum(data)==True):
+        self.print_to_log('checksum matched:','Proceeding to write')
+
+        new_file=self.get_outbox_filename()
+        fd=open(new_file,'wb')
         fd.write(data)
         fd.close()
         self.print_to_log('File Content written:',data)
@@ -140,19 +142,23 @@ class astms(astmg.astmg, file_mgmt):
         #Include in chksum calculation
  
     two_digit_checksum_string='{:X}'.format(checksum).zfill(2)
-    return two_digit_checksum_string
+    return two_digit_checksum_string.encode()
 
-  def compare_checksum(self, received_ckecksum, calculated_checksum)
-    if(received_checksum==calculated_checksum)
-      return true
-    else
-      return false
+  def compare_checksum(self, received_checksum, calculated_checksum):
+    if(received_checksum==calculated_checksum):
+      return True
+    else:
+      return False
 
-  def calculate_and_compare_checksum(self, data , calculated_checksum)
+  def calculate_and_compare_checksum(self, data):
     calculated_checksum=self.get_checksum(data)
     received_checksum=data[-4:-2]
+    self.print_to_log(
+                      'Calculated checsum={}'.format(calculated_checksum),
+                      'Received checsum={}'.format(received_checksum)
+                      )
     return self.compare_checksum(received_checksum,calculated_checksum)
-    
+ 
 #Main Code###############################
 #use this to device your own script
 if __name__=='__main__':
