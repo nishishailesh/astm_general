@@ -45,7 +45,7 @@ class astms(astmg.astmg, file_mgmt):
       if(self.calculate_and_compare_checksum(data)==True):
         self.print_to_log('checksum matched:','Proceeding to write')
 
-        new_file=self.get_outbox_filename()
+        new_file=self.get_inbox_filename()
         fd=open(new_file,'wb')
         fd.write(data)
         fd.close()
@@ -103,7 +103,7 @@ class astms(astmg.astmg, file_mgmt):
         self.error_set=self.read_set.union(self.write_set)    #update error set
         
         self.get_first_outbox_file()                          #set current_outbox file
-        fd=open(self.current_outbox_file,'rb')
+        fd=open(self.outbox_data+self.current_outbox_file,'rb')
         byte_data=fd.read(1024)
         self.print_to_log('File Content',byte_data)
         chksum=self.get_checksum(byte_data)

@@ -57,14 +57,14 @@ class file_mgmt(object):
     inbox_files=os.listdir(self.inbox_data)
     for each_file in inbox_files:
       if(os.path.isfile(self.inbox_data+each_file)):
-        self.current_inbox_file=self.inbox_data+each_file
-        self.print_to_log('current inbox  file:',self.current_inbox_file)
+        self.current_inbox_file=each_file
+        self.print_to_log('current inbox filepath:',self.inbox_data+self.current_inbox_file)
         try:
-          fh=open(self.current_inbox_file,'rb')
+          fh=open(self.inbox_data+self.current_inbox_file,'rb')
           fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
           return True
         except Exception as my_ex:
-         msg="{} is locked. trying next..".format(self.current_inbox_file)
+         msg="{} is locked. trying next..".format(self.inbox_data+self.current_inbox_file)
          self.print_to_log(my_ex,msg)
     return False  #no file to read
 
@@ -74,20 +74,20 @@ class file_mgmt(object):
     outbox_files=os.listdir(self.outbox_data)
     for each_file in outbox_files:
       if(os.path.isfile(self.outbox_data+each_file)):
-        self.current_outbox_file=self.outbox_data+each_file
-        self.print_to_log('current outbox  file:',self.current_outbox_file)
+        self.current_outbox_file=each_file
+        self.print_to_log('current outbox filepath:',self.outbox_data+self.current_outbox_file)
         try:
-          fh=open(self.current_outbox_file,'rb')
+          fh=open(self.outbox_data+self.current_outbox_file,'rb')
           fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
           return True
         except Exception as my_ex:
-         msg="{} is locked. trying next..".format(self.current_outbox_file)
+         msg="{} is locked. trying next..".format(self.outbox_data+self.current_outbox_file)
          self.print_to_log(my_ex,msg)
     return False  #no file to read
 
   def get_inbox_filename(self):
     dt=datetime.datetime.now()
-    return inbox_data+dt.strftime("%Y-%m-%d-%H-%M-%S-%f")
+    return self.inbox_data+dt.strftime("%Y-%m-%d-%H-%M-%S-%f")
 
   def get_outbox_filename(self):
     dt=datetime.datetime.now()
@@ -95,8 +95,8 @@ class file_mgmt(object):
 
 
   def archive_outbox_file(self):
-    shutil.move(self.current_outbox_file, self.outbox_arch)
+    shutil.move(self.outbox_data+self.current_outbox_file, self.outbox_arch+self.current_outbox_file)
     #pass #useful during debugging
 
   def archive_inbox_file(self):
-    shutil.move(self.current_inbox_file, self.inbox.arch)
+    shutil.move(self.inbox_data+self.current_inbox_file, self.inbox_arch+self.current_inbox_file)
