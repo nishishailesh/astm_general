@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import os, fcntl,shutil,datetime
+import os, fcntl,shutil,datetime, logging
 import astm_bidirectional_conf as conf
 
 class my_sql(object):
@@ -30,23 +30,15 @@ class my_sql(object):
   def close_link(self,con):
     con.close()
 
-
+#logging defined in child class, illogical
 class file_mgmt(object):
   def __init__(self):
-    #logging.basicConfig(filename=conf.log_filename,level=logging.DEBUG)
-    #self.logger = logging.getLogger('astm_bidirectional_common')
-    pass
-    
-  def print_to_log(self,my_object,special_message):
-    #self.logger.debug('Start=========')
-    #self.logger.debug(my_object)
-    #self.logger.debug(special_message)
-    #self.logger.debug('End=========')
     pass
     
   def set_inbox(self,inbox_data,inbox_arch):
     self.inbox_data=inbox_data
-    self.inbox=inbox_arch
+    self.inbox_arch=inbox_arch
+    
 
   def set_outbox(self,outbox_data,outbox_arch):
     self.outbox_data=outbox_data
@@ -58,14 +50,14 @@ class file_mgmt(object):
     for each_file in inbox_files:
       if(os.path.isfile(self.inbox_data+each_file)):
         self.current_inbox_file=each_file
-        self.print_to_log('current inbox filepath:',self.inbox_data+self.current_inbox_file)
+        print_to_log('current inbox filepath:',self.inbox_data+self.current_inbox_file)
         try:
           fh=open(self.inbox_data+self.current_inbox_file,'rb')
           fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
           return True
         except Exception as my_ex:
          msg="{} is locked. trying next..".format(self.inbox_data+self.current_inbox_file)
-         self.print_to_log(my_ex,msg)
+         print_to_log(my_ex,msg)
     return False  #no file to read
 
 
@@ -75,14 +67,14 @@ class file_mgmt(object):
     for each_file in outbox_files:
       if(os.path.isfile(self.outbox_data+each_file)):
         self.current_outbox_file=each_file
-        self.print_to_log('current outbox filepath:',self.outbox_data+self.current_outbox_file)
+        print_to_log('current outbox filepath:',self.outbox_data+self.current_outbox_file)
         try:
           fh=open(self.outbox_data+self.current_outbox_file,'rb')
           fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
           return True
         except Exception as my_ex:
          msg="{} is locked. trying next..".format(self.outbox_data+self.current_outbox_file)
-         self.print_to_log(my_ex,msg)
+         print_to_log(my_ex,msg)
     return False  #no file to read
 
   def get_inbox_filename(self):
@@ -97,6 +89,11 @@ class file_mgmt(object):
   def archive_outbox_file(self):
     shutil.move(self.outbox_data+self.current_outbox_file, self.outbox_arch+self.current_outbox_file)
     #pass #useful during debugging
+    #full path from source to destination prevent exception on ovewriting
 
   def archive_inbox_file(self):
     shutil.move(self.inbox_data+self.current_inbox_file, self.inbox_arch+self.current_inbox_file)
+
+
+def print_to_log(object1,object2):
+  logging.debug('{} {}'.format(object1,object2))

@@ -33,8 +33,8 @@ class astmg(object):
       
   def print_to_log(self,my_object,special_message):
     #self.logger.debug('Start=========')
-    self.logger.debug(my_object)
-    self.logger.debug(special_message)
+    logging.debug(my_object)
+    logging.debug(special_message)
     #self.logger.debug('End=========')
 
   ###################################
@@ -65,8 +65,8 @@ class astmg(object):
           
   def __init__(self):
     #logging.basicConfig(filename=conf.log_filename,level=logging.CRITICAL)
-    logging.basicConfig(filename=conf.log_filename,level=logging.DEBUG)
-    self.logger = logging.getLogger('astm_bidirectional_general')
+    #logging.basicConfig(filename=conf.log_filename,level=logging.DEBUG)
+    #self.logger = logging.getLogger('astm_bidirectional_general')
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     self.s.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE, 1) 
@@ -173,11 +173,15 @@ class astmg(object):
       #if(len(self.readable)==0 and len(self.writable)==0 and len(self.exceptional)==0):
       #  self.print_to_log('readable, writable,exceptional are silent','Let me do somethin else')
       self.initiate_write()  
-          
-         
+
+def print_to_log(object1,object2):
+  logging.debug('{} {}'.format(object1,object2))
+                     
 #Main Code###############################
 #use this to device your own script
 if __name__=='__main__':
+  logging.basicConfig(filename=conf.astm_log_filename,level=logging.DEBUG)  
+  
   #print('__name__ is ',__name__,',so running code')
   while True:
     m=astmg()
