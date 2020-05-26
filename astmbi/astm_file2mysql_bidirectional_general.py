@@ -204,8 +204,10 @@ class astm_file(file_mgmt,my_sql):
           self.on_header(x)             #set delimiters
         elif x[0]=='P':
           self.on_patient(x)            #cleanup
-        elif x[0]=='O' or x[0]=='Q':
+        elif x[0]=='O':
           self.on_order(x)              #set sample_id
+        elif x[0]=='Q':
+          self.on_query(x)              #cleanup + sample_id
         #elif x[0]=='R':
         #  self.on_result(x)
         elif x[0]=='L':                 #cleanup
@@ -241,7 +243,7 @@ class astm_file(file_mgmt,my_sql):
       self.final_data=self.final_data + ((self.sample_id,self.result),)
   
     patient_tuple=self.on_any_line(patient_line)
-
+    
     #initialize
     try:
       print_to_log('New Patient arrived. Initializing...','number:{pn} '.format(pn=patient_tuple[1]))
@@ -260,12 +262,40 @@ class astm_file(file_mgmt,my_sql):
     self.result=()
     pstr='({res})'.format(res=self.result)
     print_to_log('Results: after initialization:',pstr)
-      
-  #must for finding sample ID
+    self.result=self.result + (patient_tuple,)
+    
+  #must for finding sample ID in query record
+  def on_query(self,query_line):
+    #Manage previous query here (query donot have patient record
+    #Manage last query on getting termination record
+    if len(str(self.sample_id))>0:    #if previous patient exist
+      self.final_data=self.final_data + ((self.sample_id,self.result),)
+  
+    query_tuple=self.on_any_line(query_line)
+    
+    #initialize
+    try:
+      print_to_log('New query arrived. Initializing...','sample_id:{} '.format(query_tuple[2]))
+      self.sample_id=query_tuple[2]
+    except Exception as my_ex:
+      pstr='Look at Q record <<<{}>>> Is it inappropriate? no query_tuple[2] found'.format(query_tuple)
+      print_to_log(pstr,my_ex)
+      self.sample_id=''
+
+    pstr='({res}) ...'.format(res=self.result)
+    print_to_log('Previous Results:',pstr)
+    self.result=()
+    pstr='({res})'.format(res=self.result)
+    print_to_log('Results: after initialization:',pstr)        
+
+    self.result=self.result + (query_tuple,)
+  
+  #must for finding sample ID in patient record
   def on_order(self,order_line):
     order_tuple=self.on_any_line(order_line)
     #initialize
-    
+    self.result=self.result + (order_tuple,)
+      
     try:
       self.sample_id=order_tuple[2]
       pstr='New Sample Id:({sid})'.format(sid=self.sample_id)
@@ -283,11 +313,11 @@ class astm_file(file_mgmt,my_sql):
   #must for writing last patient results
   def on_termination(self,termination_line):
     termination_tuple=self.on_any_line(termination_line)
+    self.result=self.result + (termination_tuple,)
     #update final data on recept of new patient and at last on termination
     if len(str(self.sample_id))>0:
       self.final_data=self.final_data + ((self.sample_id,self.result),)
-
-
+    
 def print_to_log(object1,object2):
   logging.debug('{} {}'.format(object1,object2))
   

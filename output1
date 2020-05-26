@@ -1,0 +1,67 @@
+DEBUG:root:Listening to [4, 5] , [] , [4, 5]  Heard from for [] , [] , [] 
+
+####Initiated activity
+  DEBUG:root:main_status=0 send_status=0 Entering initiate_write()
+  DEBUG:root:main_status==0 initiate_write() will find some pending work
+
+  ####ENQ queued
+  DEBUG:root:Listening to [4, 5] , [] , [4, 5]  Heard from for [] , [] , [] 
+
+    DEBUG:root:main_status=0 send_status=0 Entering initiate_write()
+    DEBUG:root:main_status==0 initiate_write() will find some pending work
+    DEBUG:root:current outbox filepath: /root/xl1000.outbox.data/one_sample
+    DEBUG:root:main_status==2 initiate_write() changed main_status to 2 to send data
+    DEBUG:root:send_status==1 initiate_write() sent ENQ to write buffer
+
+          ####ENQ sent
+          DEBUG:root:Listening to [4, 5] , [5] , [4, 5]  Heard from for [] , [5] , [] 
+
+            DEBUG:root:<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('11.207.1.1', 2576), raddr=('11.207.1.2', 49172)> conn is writable. using manage_write()
+            DEBUG:root:Following will be sent: b'\x05'
+  
+####ACK1 Received
+DEBUG:root:Listening to [4, 5] , [] , [4, 5]  Heard from for [5] , [] , [] 
+
+  DEBUG:root:<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('11.207.1.1', 2576), raddr=('11.207.1.2', 49172)> Conn have sent some data using recv() and manage_read()
+  DEBUG:root:Following is received: b'\x06'
+
+  ##message queued
+  DEBUG:root:send_status==2 post-ENQ ACK
+  DEBUG:root:current outbox filepath: /root/xl1000.outbox.data/one_sample
+  DEBUG:root:File Content b'\x021H|`^&|||MBDC_Online V2.11\rP|1|0009281|3||Porlezza-Hohler^Yvonne||19331224|F\rO|1|12121212^||^^^Na`^^^K`^^^ALB|S||20100607074416||||A||||Serum\rL|1|N\r\x03DE\r\n'
+  DEBUG:root:CHKSUM b'DE'
+  DEBUG:root:send_status==3 initiate_write() changed send_status to 3 (data sent to write buffer)
+
+          ####message sent 
+          DEBUG:root:Listening to [4, 5] , [5] , [4, 5]  Heard from for [] , [5] , [] 
+
+            DEBUG:root:<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('11.207.1.1', 2576), raddr=('11.207.1.2', 49172)> conn is writable. using manage_write()
+            DEBUG:root:Following will be sent: b'\x021H|`^&|||MBDC_Online V2.11\rP|1|0009281|3||Porlezza-Hohler^Yvonne||19331224|F\rO|1|12121212^||^^^Na`^^^K`^^^ALB|S||20100607074416||||A||||Serum\rL|1|N\r\x03DE\r\n'
+
+
+####ACK2 Received
+DEBUG:root:Listening to [4, 5] , [] , [4, 5]  Heard from for [5] , [] , [] 
+
+  DEBUG:root:<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('11.207.1.1', 2576), raddr=('11.207.1.2', 49172)> Conn have sent some data using recv() and manage_read()
+  DEBUG:root:Following is received: b'\x06'
+  
+  ##EOT queued
+  DEBUG:root:send_status==4 post-LF ACK
+  DEBUG:root:send_status==0 sent EOT
+  DEBUG:root:main_status==0 connection is now, neutral
+  DEBUG:root:main_status=0 send_status=0 Entering initiate_write()
+  DEBUG:root:main_status==0 initiate_write() will find some pending work
+  DEBUG:root:main_status==0 no data in outbox. sleeping for a while
+
+          ####EOT sent
+          DEBUG:root:Listening to [4, 5] , [5] , [4, 5]  Heard from for [] , [5] , [] 
+            
+            DEBUG:root:<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('11.207.1.1', 2576), raddr=('11.207.1.2', 49172)> conn is writable. using manage_write()
+            DEBUG:root:Following will be sent: b'\x04'
+            
+            DEBUG:root:main_status=0 send_status=0 Entering initiate_write()
+            DEBUG:root:main_status==0 initiate_write() will find some pending work
+            DEBUG:root:main_status==0 no data in outbox. sleeping for a while
+            
+            DEBUG:root:send_status==0 initiate_write() sent EOT
+            DEBUG:root:main_status==0 initiate_write() now, neutral

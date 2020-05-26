@@ -16,7 +16,7 @@ class astmg(object):
   exceptional=set()
 
   def list_wait(self):
-    self.print_to_log('Listening to {} , {} , {} '.
+    print_to_log('Listening to {} , {} , {} '.
                     format(
                             list(map(socket.socket.fileno,self.read_set)),
                             list(map(socket.socket.fileno,self.write_set)),
@@ -31,12 +31,6 @@ class astmg(object):
                       )
     #'Received for {} , {} , {} '.format(self.readable,self.writable,self.exceptional))
       
-  def print_to_log(self,my_object,special_message):
-    #self.logger.debug('Start=========')
-    logging.debug(my_object)
-    logging.debug(special_message)
-    #self.logger.debug('End=========')
-
   ###################################
   #override this function in subclass
   ###################################
@@ -48,15 +42,18 @@ class astmg(object):
     if(data==b'apple\n'):
       self.write_msg=b'Demo manage_read() override me. apple is Red\n' 
   
+  ###################################
+  #override this function in subclass
+  ###################################
   def manage_write(self):      
     #Send message in response to write_set->select->writable initiated by manage_read() and initiate_write()
-    self.print_to_log('Following will be sent',self.write_msg) 
+    print_to_log('Following will be sent',self.write_msg) 
     self.conn[0].send(self.write_msg)                     
     self.write_set.remove(self.conn[0])                   #now no message pending, so remove it from write set
     self.error_set=self.read_set.union(self.write_set)    #update error set
   
   ###################################
-  #override this function in subclass
+  #override this function in subclass , generally not required, unless status change needs to be monitored
   ###################################
   def initiate_write(self):
     self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
@@ -77,22 +74,22 @@ class astmg(object):
     try:
       self.s.bind((conf.host_address,int(conf.host_port)))	#it is a tuple
     except Exception as my_exception:      
-      self.print_to_log(my_exception,'bind() failed, ip/port correct??Quitting')
+      print_to_log(my_exception,'bind() failed, ip/port correct??Quitting')
       quit()      
     self.s.listen(2)
 
-    self.print_to_log(self.s,'select() is waiting..') 
+    print_to_log(self.s,'select() is waiting..') 
     self.readable, self.writable, self.exceptional = select.select((self.s,),(self.s,),(self.s,))
-    self.print_to_log(self.s,'select() detected activity')
+    print_to_log(self.s,'select() detected activity')
     if(self.s in self.exceptional):
-      self.print_to_log(self.s,'some error on socket s. quitting')
+      print_to_log(self.s,'some error on socket s. quitting')
       quit() 
     if(self.s in self.writable):
-      self.print_to_log(self.s,'Can not understand why s is writting')
+      print_to_log(self.s,'Can not understand why s is writting')
       quit() 
     if(self.s in self.readable):
       self.conn = self.s.accept()
-      self.print_to_log(self.s,'Connection request is read')  
+      print_to_log(self.s,'Connection request is read')  
       self.conn[0].setblocking(0)    
       
   def astmg_loop(self):
@@ -111,36 +108,41 @@ class astmg(object):
       #self.print_to_log('','after select')
       self.list_wait()
       ###if anybody else try to connect, reject it
+
       if(self.s in self.exceptional):
-        self.print_to_log(self.s,'some error on socket s. quitting')
+        print_to_log(self.s,'some error on socket s. quitting')
         quit() 
+
       if(self.s in self.writable):
-        self.print_to_log(self.s,'Can not understand why s is writting')
+        print_to_log(self.s,'Can not understand why s is writting')
         quit() 
+
       if(self.s in self.readable):
         dummy_conn = self.s.accept()
-        self.print_to_log(self.s,'Connection request is read, This is second connection. We do not want it. shutdown, distroy')
+        print_to_log(self.s,'Connection request is read, This is second connection. We do not want it. shutdown, close')
         dummy_conn[0].shutdown(socket.SHUT_RDWR)
         dummy_conn[0].close()
         
       ###For client do work
       if(self.conn[0] in self.exceptional):
-        self.print_to_log(self.conn[0],'some error on socket conn. quitting')
+        print_to_log(self.conn[0],'some error on socket conn. quitting')
         quit() 
+
       if(self.conn[0] in self.writable):
         #sending message (somewhere else conn[0] was added in writable and self.write_msg was given value
-        self.print_to_log(self.conn[0],'conn is writable. using send')
-        self.manage_write()               
+        print_to_log(self.conn[0],'conn is writable. using manage_write()')
+        self.manage_write() 
+                       
       if(self.conn[0] in self.readable):
-        self.print_to_log(self.conn[0],'Conn have sent some data')
+        print_to_log(self.conn[0],'Conn have sent some data using recv() and manage_read()')
         data=self.conn[0].recv(1024)
-        self.print_to_log(self.conn[0],data)  
+        print_to_log('Following is received:',data)  
         self.manage_read(data)
           
           
         #if EOF 1)close socket 2)remove from list 3)accept new
         if(data==b''):
-          self.print_to_log(self.conn[0],'Conn have closed, accepting new connection')
+          print_to_log(self.conn[0],'Conn have closed, accepting new connection')
           
           #1) close socket
           self.conn[0].shutdown(socket.SHUT_RDWR)
@@ -160,18 +162,11 @@ class astmg(object):
           
           #3) Accept new, add to read set
           self.conn = self.s.accept()
-          self.print_to_log(self.s,'New Connection request is read')  
+          print_to_log(self.s,'New Connection request is read')  
           self.conn[0].setblocking(0)
           self.read_set.add(self.conn[0])
           self.error_set=self.read_set.union(self.write_set)
-       
-      #If select return due to timeout -> all three tuples are empty
-      #probably there is no nagging from client
-      #This is ideal time to start nagging client
-        
-      #print('lenghts:', len(self.readable), len(self.writable), len(self.exceptional))  
-      #if(len(self.readable)==0 and len(self.writable)==0 and len(self.exceptional)==0):
-      #  self.print_to_log('readable, writable,exceptional are silent','Let me do somethin else')
+
       self.initiate_write()  
 
 def print_to_log(object1,object2):

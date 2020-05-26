@@ -14,7 +14,7 @@ class astms(astmg.astmg, file_mgmt):
           #2=sending
 
     self.send_status=0
-          #1=enq queued
+          #1=enq sent
           #2=1st ack received
           #3=data sent
           #4=2nd ack received
@@ -37,7 +37,8 @@ class astms(astmg.astmg, file_mgmt):
 
     #for receiving data
     if(data==b'\x05'):
-      signal.alarm(0)      
+      signal.alarm(0)
+      
       self.main_status=1
       self.write_msg=b'\x06'
       self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
@@ -53,14 +54,25 @@ class astms(astmg.astmg, file_mgmt):
       
       signal.alarm(self.alarm_time)
 
+    #difficult
+    #see if last byte of data is LF or not
+    #byte members are int. so int->chr(string) -> to byte
+    #elif( chr( data[ len(data) - 1 ] ).encode() == b'\x0a'):
+    #easy!!!
     elif(data[-1:] == b'\x0a'):
       signal.alarm(0)
       
       if(self.calculate_and_compare_checksum(data)==True):
-        print_to_log('checksum matched:','Proceeding to write data')
+        print_to_log('checksum matched:','Proceeding to write')
         self.fd.write(data)
         print_to_log('File Content written:',data)
-                     
+        
+        #removing other characters, not implimented here
+        #self.fd.write(data[1:-5])
+        #print_to_log('Full data:',data)
+        #print_to_log('File Content written:',data[1:-5])
+        #donot close, wait for eot
+              
         self.write_msg=b'\x06'
         self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
         self.error_set=self.read_set.union(self.write_set)    #update error set      
@@ -81,17 +93,53 @@ class astms(astmg.astmg, file_mgmt):
       self.fd.close()
       self.main_status=0
       self.send_status=0
+      #no need update set write_set
+      
+      #no need to set alarm
+      #signal.alarm(self.alarm_time)
 
-
-    elif(data==b'\x06'):            #ACK
+    #for sending data, not received during receive-transection
+    #only during sending transaction
+    if(data==b'\x06'):            #ACK
 
       if(self.send_status==1):
-        signal.alarm(0)
         self.send_status=2
         print_to_log('send_status=={}'.format(self.send_status),'post-ENQ ACK')
 
-        #writing
+      if(self.send_status==3):
+        self.send_status=4
+        print_to_log('send_status=={}'.format(self.send_status),'post-LF ACK')
+
+    if(data==b'\x15'):            #NAK
+      self.send_status=4
+      print_to_log('send_status=={}'.format(self.send_status),'post-LF NAK. Some error')
         
+  ###################################
+  #override this function in subclass
+  ###################################
+  #This handles only STX-ETX data. NO STX-ETB management is done
+  def initiate_write(self):
+    print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'Entering initiate_write()') 
+    if(self.main_status!=0):
+      print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'busy somewhre.. initiate_write() will not initiate anything') 
+    else:
+      print_to_log('main_status=={}'.format(self.main_status),'initiate_write() will find some pending work') 
+      if(self.get_first_outbox_file()==True):                 #There is something to work      
+        self.main_status=2                                    #announce that we are busy sending data
+        print_to_log('main_status=={}'.format(self.main_status),'initiate_write() changed main_status to 2 to send data')
+      else:
+        print_to_log('main_status=={}'.format(self.main_status),'no data in outbox. sleeping for a while')
+        return
+
+    if(self.main_status==2):                                #in process of sending
+      if(self.send_status==0):                                #eot was sent for sending
+        self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
+        self.error_set=self.read_set.union(self.write_set)    #update error set
+        self.write_msg=b'\x05'                                #set message ENQ
+        self.send_status=1                                    #status to ENQ sent
+        print_to_log('send_status=={}'.format(self.send_status),'initiate_write() sent ENQ to write buffer')
+        
+      elif(self.send_status==2):                              #First ACK received. Time to send data 
         self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
         self.error_set=self.read_set.union(self.write_set)    #update error set
         
@@ -107,71 +155,20 @@ class astms(astmg.astmg, file_mgmt):
         chksum=self.get_checksum(byte_data)
         print_to_log('CHKSUM',chksum)
         self.write_msg=byte_data #set message
-        self.send_status=3       #data sent
-        print_to_log('send_status=={}'.format(self.send_status),'changed send_status to 3 (data sent to write buffer)')
-        #writing end
-        signal.alarm(self.alarm_time) #wait for receipt of second ack
-        
-      elif(self.send_status==3):
-        signal.alarm(0)
-        self.send_status=4
-        print_to_log('send_status=={}'.format(self.send_status),'post-LF ACK')
+        self.send_status=3                                    #dat sent
+        print_to_log('send_status=={}'.format(self.send_status),'initiate_write() changed send_status to 3 (data sent to write buffer)')
 
-        #write
+      elif(self.send_status==4):                              #Second ACK received. Time to send data 
         self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
         self.error_set=self.read_set.union(self.write_set)    #update error set
         self.write_msg=b'\x04'                                #set message EOT
         self.archive_outbox_file()
-        self.send_status=0                                    #data sent
+        self.send_status=0                                    #dat sent
         self.main_status=0
-        print_to_log('send_status=={}'.format(self.send_status),'sent EOT')
-        print_to_log('main_status=={}'.format(self.main_status),'connection is now, neutral')
-        #write end
-        #alarm not required, no expectation signal.alarm(self.alarm_time) 
-
-    elif(data==b'\x15'):            #NAK
-      signal.alarm(0)
-      self.send_status=4
-      print_to_log('send_status=={}'.format(self.send_status),'post-ENQ/LF NAK. Some error')
-
-      #write - same as above
-      self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
-      self.error_set=self.read_set.union(self.write_set)    #update error set
-      self.write_msg=b'\x04'                                #set message EOT
-      self.archive_outbox_file()
-      self.send_status=0                                    #dat sent
-      self.main_status=0
-      print_to_log('send_status=={}'.format(self.send_status),'initiate_write() sent EOT')
-      print_to_log('main_status=={}'.format(self.main_status),'initiate_write() now, neutral')
-      #write end        
-      #alarm not required, no expectation signal.alarm(self.alarm_time) 
-      
-  ###################################
-  #override this function in subclass
-  ###################################
-  #This handles only STX-ETX data. NO STX-ETB management is done
-  def initiate_write(self):
-    print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'Entering initiate_write()') 
-    if(self.main_status==0):
-      print_to_log('main_status=={}'.format(self.main_status),'initiate_write() will find some pending work') 
-      if(self.get_first_outbox_file()==True):                 #There is something to work      
-        signal.alarm(0) 
-        self.main_status=2                                    #announce that we are busy sending data
-        print_to_log('main_status=={}'.format(self.main_status),'initiate_write() changed main_status to 2 to send data')
-        self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
-        self.error_set=self.read_set.union(self.write_set)    #update error set
-        self.write_msg=b'\x05'                                #set message ENQ
-        self.send_status=1                                    #status to ENQ sent
-        print_to_log('send_status=={}'.format(self.send_status),'initiate_write() sent ENQ to write buffer')
-        signal.alarm(self.alarm_time) #wait for receipt of 1st ACK
-      else:
-        print_to_log('main_status=={}'.format(self.main_status),'no data in outbox. sleeping for a while')
-        return
-    else:
-      print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'busy somewhre.. initiate_write() will not initiate anything') 
+        print_to_log('send_status=={}'.format(self.send_status),'initiate_write() sent EOT')
+        print_to_log('main_status=={}'.format(self.main_status),'initiate_write() now, neutral')
 
 
-       
   #######Specific funtions for ASTM        
   def get_checksum(self,data):
     checksum=0
@@ -211,20 +208,13 @@ class astms(astmg.astmg, file_mgmt):
     return self.compare_checksum(received_checksum,calculated_checksum)
 
   def signal_handler(self,signal, frame):
-    print_to_log('Alarm Stopped','Signal:{} Frame:{}'.format(signal,frame))
-    print_to_log('change statuses ',' and close file')
-
-    print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),' -->previous ') 
-    self.send_status=0                                    #data sent
-    self.main_status=0    
-    print_to_log('current main_status={} send_status={}'.format(self.main_status,self.send_status),' -->current ') 
-    
+    print_to_log('Alarm Stopped','Signal:{} Frame:{}'.format(signal,frame))    
     try:
       if self.fd!=None:        
         self.fd.close()
         print_to_log('self.signal_handler()','file closed')
     except Exception as my_ex:
-      print_to_log('self.signal_handler()','error in closing file:{}'.format(my_ex))    
+      print_to_log('self.signal_handler()','error in closing file:{}'.format(my_ex))
     
     print_to_log('Alarm..response NOT received in stipulated time','data receving/sending may be incomplate')
 

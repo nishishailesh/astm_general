@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import os, fcntl,shutil,datetime, logging
 import astm_bidirectional_conf as conf
+import MySQLdb
 
 class my_sql(object):
   def get_link(self,my_host,my_user,my_pass,my_db):
