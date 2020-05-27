@@ -80,6 +80,8 @@ class astm_file_xl1000(astm_file):
 
         if(each_record[0]=='Q'):
           
+          #set sample_id, there is ^ for multiple sample_id in xl1000
+          #in R record it is plain
           sample_id=each_sample[0].split(self.s3)[1]
           print_to_log('sample_id',sample_id)
 
@@ -87,7 +89,7 @@ class astm_file_xl1000(astm_file):
             print_to_log('sample_id is not number:',sample_id)
             return False;
           
-          
+          #get examination codes
           print_to_log('Q tuple:',each_record)
           print_to_log('Q prepared_sql:',prepared_sql_q)
           data_tpl=(sample_id,self.equipment)
@@ -97,16 +99,91 @@ class astm_file_xl1000(astm_file):
             print_to_log('Q cursor:',cur)
           except Exception as my_ex:
             print_to_log('Q exception description:',my_ex)
- 
+          
           single_q_data=self.get_single_row(cur)
+          requested_examination_code=()
           while(single_q_data):
             print_to_log('examination_id={}'.format(single_q_data[1]), ' code={}'.format(single_q_data[2]))
+            requested_examination_code=requested_examination_code+(single_q_data[2],)
             single_q_data=self.get_single_row(cur)
-            
+          
           self.close_cursor(cur)
           
+          print_to_log(
+                      'Sample ID {}:'.format(sample_id),
+                      'Following is requested {}:'.format(requested_examination_code)
+                      )
+                      
+          order_to_send=self.make_order(sample_id,requested_examination_code)
+          print_to_log('Order ready',order_to_send)
+          fname=self.get_outbox_filename()
+          fd=open(fname,'bw')
+          fd.write(order_to_send)
+          fd.close()
+          
     self.close_link(con)
+
+  def make_order(self,sample_id,requested_examination_code):
+    '''
+    <STX>1H|`^&|||MBDC_Online ^V2.11<CR> 
+    P|1|0081692|7||Neumann-Raber^Jurg||19330401|M<CR>  
+    O|1|00176860^01||^^^SGPTD`^^^SGOTD`|R||20100607074420[T1] ||||A||||Serum<CR>  
+    L|1N<CR><ETX>1D<CR><LF>
+    '''
     
+    '''
+    '^^^'+'`^^^'.join(('ALB','CRR'))+'`'
+    ^^^ALB`^^^CRR`
+    
+    b'^^^'+'`^^^'.join(('ALB','CRR')).encode()+b'`'
+    '''
+    
+    '''
+    A : Add the requested tests or batteries to the existing sample, if in response to query??
+    N : New requests accompanying a new sample, if totally new??
+    '''
+    
+    ex_code_str=b'^^^'+'`^^^'.join(requested_examination_code).encode()+b'`'
+    
+    
+    frame_number=1
+    print_to_log('seperators ',self.s1)
+    header_line=  b'1H'+self.s1.encode()+self.s2.encode()+self.s3.encode()+self.s4.encode()+b'|||cl_general'
+    patient_line= b'P|1|||||||'
+    order_line=   b'O|1|'+sample_id.encode()+b'^01||'+ex_code_str+b'|R||||||A||||serum'
+    terminator_line=b'L|1N'
+    
+    str_for_checksum=b'\x02'+header_line+b'\x0d'+patient_line+b'\x0d'+order_line+ b'\x0d'+terminator_line+ b'\x0d\x03'
+    checksum=self.get_checksum(str_for_checksum)
+    print_to_log('Calculated checksum=: ',checksum)
+    final_message=str_for_checksum+checksum+b'\x0d\x0a'
+    print_to_log('Final message: ',final_message)
+    return final_message
+    
+  def get_checksum(self,data):
+    checksum=0
+    start_chk_counting=False
+    for x in data:
+      if(x==2):
+        start_chk_counting=True
+        #Exclude from chksum calculation
+        continue
+
+      if(start_chk_counting==True):
+        checksum=(checksum+x)%256
+
+      if(x==3):
+        start_chk_counting=False
+        #Include in chksum calculation
+      if(x==23):
+        start_chk_counting=False
+        #Include in chksum calculation
+ 
+    two_digit_checksum_string='{:X}'.format(checksum).zfill(2)
+    return two_digit_checksum_string.encode()
+  
+  
+      
   def get_eid_for_sid_code(self,con,sid,ex_code):
     logging.debug(sid)
     prepared_sql='select examination_id from result where sample_id=%s'

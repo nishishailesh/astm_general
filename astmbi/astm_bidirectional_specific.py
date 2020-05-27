@@ -123,7 +123,7 @@ class astms(astmg.astmg, file_mgmt):
         self.write_msg=b'\x04'                                #set message EOT
         self.archive_outbox_file()
         self.send_status=0                                    #data sent
-        self.main_status=0
+        #self.main_status=0
         print_to_log('send_status=={}'.format(self.send_status),'sent EOT')
         print_to_log('main_status=={}'.format(self.main_status),'connection is now, neutral')
         #write end

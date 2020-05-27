@@ -51,6 +51,8 @@ class astmg(object):
     self.conn[0].send(self.write_msg)                     
     self.write_set.remove(self.conn[0])                   #now no message pending, so remove it from write set
     self.error_set=self.read_set.union(self.write_set)    #update error set
+    if(self.write_msg==b'\x04'):
+      self.main_status=0
   
   ###################################
   #override this function in subclass , generally not required, unless status change needs to be monitored
