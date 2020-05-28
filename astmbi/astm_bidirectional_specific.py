@@ -201,8 +201,7 @@ class astms(astmg.astmg, file_mgmt):
       self.main_status=0
       self.send_status=0
     else:                               #if data stream is incomplate/inappropriate containing EOT etc
-      self.main_status=0
-      self.send_status=0
+      self.send_status=3
 
   #######Specific funtions for ASTM        
   def get_checksum(self,data):
