@@ -80,46 +80,51 @@ class astm_file_xl1000(astm_file):
 
         if(each_record[0]=='Q'):
           
-          #set sample_id, there is ^ for multiple sample_id in xl1000
+          #set sample_id, there is ^ for profile and ` for multiple sample_id in xl1000
+          #Q|1|^1007149`1007152`1007151`1007150`1007148|||S|||||||O
           #in R record it is plain
-          sample_id=each_sample[0].split(self.s3)[1]
-          print_to_log('sample_id',sample_id)
+          #sample_id=each_sample[0].split(self.s3)[1]
+          sample_id_list=each_sample[0].split(self.s3)[1].split(self.s3)
+          print_to_log('sample_id_list:',sample_id_list)
 
-          if(sample_id.rstrip(' ').isnumeric() == False):
-            print_to_log('sample_id is not number:',sample_id)
-            return False;
-          
-          #get examination codes
-          print_to_log('Q tuple:',each_record)
-          print_to_log('Q prepared_sql:',prepared_sql_q)
-          data_tpl=(sample_id,self.equipment)
-          print_to_log('Q data tuple:',data_tpl)
-          try: 
-            cur=self.run_query(con,prepared_sql_q,data_tpl)
-            print_to_log('Q cursor:',cur)
-          except Exception as my_ex:
-            print_to_log('Q exception description:',my_ex)
-          
-          single_q_data=self.get_single_row(cur)
-          requested_examination_code=()
-          while(single_q_data):
-            print_to_log('examination_id={}'.format(single_q_data[1]), ' code={}'.format(single_q_data[2]))
-            requested_examination_code=requested_examination_code+(single_q_data[2],)
+          for sample_id in sample_id_list:
+            if(sample_id.rstrip(' ').isnumeric() == False):
+              print_to_log('sample_id is not number:',sample_id)
+              continue;
+            
+            #get examination codes
+            print_to_log('Q tuple:',each_record)
+            print_to_log('Q prepared_sql:',prepared_sql_q)
+            data_tpl=(sample_id,self.equipment)
+            print_to_log('Q data tuple:',data_tpl)
+            try: 
+              cur=self.run_query(con,prepared_sql_q,data_tpl)
+              print_to_log('Q cursor:',cur)
+            except Exception as my_ex:
+              print_to_log('Q exception description:',my_ex)
+            
             single_q_data=self.get_single_row(cur)
-          
-          self.close_cursor(cur)
-          
-          print_to_log(
-                      'Sample ID {}:'.format(sample_id),
-                      'Following is requested {}:'.format(requested_examination_code)
-                      )
-                      
-          order_to_send=self.make_order(sample_id,requested_examination_code)
-          print_to_log('Order ready',order_to_send)
-          fname=self.get_outbox_filename()
-          fd=open(fname,'bw')
-          fd.write(order_to_send)
-          fd.close()
+            requested_examination_code=()
+            while(single_q_data):
+              print_to_log('examination_id={}'.format(single_q_data[1]), ' code={}'.format(single_q_data[2]))
+              requested_examination_code=requested_examination_code+(single_q_data[2],)
+              single_q_data=self.get_single_row(cur)
+            
+            self.close_cursor(cur)
+            
+            print_to_log(
+                        'Sample ID {}:'.format(sample_id),
+                        'Following is requested {}:'.format(requested_examination_code)
+                        )
+                        
+            order_to_send=self.make_order(sample_id,requested_examination_code)
+            print_to_log('Order ready',order_to_send)
+            fname=self.get_outbox_filename()
+            print_to_log('file to be written',fname)
+            fd=open(fname,'bw')
+            fd.write(order_to_send)
+            fd.close()
+            print_to_log('file written to outbox .. ',' .. and closed')
           
     self.close_link(con)
 
@@ -150,7 +155,7 @@ class astm_file_xl1000(astm_file):
     print_to_log('seperators ',self.s1)
     header_line=  b'1H'+self.s1.encode()+self.s2.encode()+self.s3.encode()+self.s4.encode()+b'|||cl_general'
     patient_line= b'P|1|||||||'
-    order_line=   b'O|1|'+sample_id.encode()+b'^01||'+ex_code_str+b'|R||||||A||||serum'
+    order_line=   b'O|1|'+sample_id.encode()+b'^03||'+ex_code_str+b'|R||||||A||||serum'
     terminator_line=b'L|1N'
     
     str_for_checksum=b'\x02'+header_line+b'\x0d'+patient_line+b'\x0d'+order_line+ b'\x0d'+terminator_line+ b'\x0d\x03'

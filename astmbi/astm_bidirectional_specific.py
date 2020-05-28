@@ -107,7 +107,10 @@ class astms(astmg.astmg, file_mgmt):
         chksum=self.get_checksum(byte_data)
         print_to_log('CHKSUM',chksum)
         self.write_msg=byte_data #set message
-        #self.send_status=3       #data sent change status only when really data of stx-lf really sent
+        
+        #self.send_status=3       
+        #data sent -> change status only when really data of stx-lf or anyother-inappropriate frame really sent
+        
         print_to_log('send_status=={}'.format(self.send_status),'changed send_status to 3 (data sent to write buffer)')
         #writing end
         signal.alarm(self.alarm_time) #wait for receipt of second ack
@@ -121,13 +124,14 @@ class astms(astmg.astmg, file_mgmt):
         self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
         self.error_set=self.read_set.union(self.write_set)    #update error set
         self.write_msg=b'\x04'                                #set message EOT
-        self.archive_outbox_file()
+        self.archive_outbox_file()                            
         #self.send_status=0                                    #change only where actually sent
         #self.main_status=0                                   #change only where actually sent
         print_to_log('send_status=={}'.format(self.send_status),'sent EOT')
         print_to_log('main_status=={}'.format(self.main_status),'connection is now, neutral')
         #write end
         #alarm not required, no expectation signal.alarm(self.alarm_time) 
+        signal.alarm(self.alarm_time) #when EOT is really sent, change status, or if nothing is sent change status using alarm
 
     elif(data==b'\x15'):            #NAK
       signal.alarm(0)
@@ -145,7 +149,8 @@ class astms(astmg.astmg, file_mgmt):
       print_to_log('main_status=={}'.format(self.main_status),'initiate_write() now, neutral')
       #write end        
       #alarm not required, no expectation signal.alarm(self.alarm_time) 
-      
+      signal.alarm(self.alarm_time) #when EOT is really sent then change status , or if nothing is sent change status
+     
   ###################################
   #override this function in subclass
   ###################################
@@ -183,17 +188,22 @@ class astms(astmg.astmg, file_mgmt):
     self.error_set=self.read_set.union(self.write_set)    #update error set
     
     #specific code for ASTM status update
+    #if sending: ENQ, ...LF, EOT is sent
+    #ff receiving: ACK, NAK sent (ACK seding donot need to change status, it activates only alarm
     if(self.write_msg==b'\x04'):      #if EOT sent
       self.main_status=0
       self.send_status=0
-    if(self.write_msg[-1:]==b'\x0a'): #if main message sent
+    elif(self.write_msg[-1:]==b'\x0a'): #if main message sent
       self.send_status=3
-    if(self.write_msg==b'\x05'):      #if enq sent
+    elif(self.write_msg==b'\x05'):      #if enq sent
       self.send_status=1
-    if(self.write_msg==b'\x15'):      #if NAK sent = EOT sent
+    elif(self.write_msg==b'\x15'):      #if NAK sent = EOT sent
       self.main_status=0
       self.send_status=0
-      
+    else:                               #if data stream is incomplate/inappropriate containing EOT etc
+      self.main_status=0
+      self.send_status=0
+
   #######Specific funtions for ASTM        
   def get_checksum(self,data):
     checksum=0
