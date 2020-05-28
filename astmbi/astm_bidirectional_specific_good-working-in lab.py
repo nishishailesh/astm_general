@@ -20,6 +20,16 @@ class astms(astmg.astmg, file_mgmt):
           #4=2nd ack received
           #0=eot sent
 
+'''
+receive status
+enq received
+ack sent
+frame-lf received
+ack sent
+eot received
+
+
+'''
     self.set_inbox(conf.inbox_data,conf.inbox_arch)
     self.set_outbox(conf.outbox_data,conf.outbox_arch)
 
@@ -83,7 +93,7 @@ class astms(astmg.astmg, file_mgmt):
       self.send_status=0
 
 
-    elif(data==b'\x06'):            #ACK when sending
+    elif(data==b'\x06'):            #ACK
 
       if(self.send_status==1):
         signal.alarm(0)
@@ -107,7 +117,7 @@ class astms(astmg.astmg, file_mgmt):
         chksum=self.get_checksum(byte_data)
         print_to_log('CHKSUM',chksum)
         self.write_msg=byte_data #set message
-        #self.send_status=3       #data sent change status only when really data of stx-lf really sent
+        self.send_status=3       #data sent
         print_to_log('send_status=={}'.format(self.send_status),'changed send_status to 3 (data sent to write buffer)')
         #writing end
         signal.alarm(self.alarm_time) #wait for receipt of second ack
@@ -122,8 +132,8 @@ class astms(astmg.astmg, file_mgmt):
         self.error_set=self.read_set.union(self.write_set)    #update error set
         self.write_msg=b'\x04'                                #set message EOT
         self.archive_outbox_file()
-        #self.send_status=0                                    #change only where actually sent
-        #self.main_status=0                                   #change only where actually sent
+        self.send_status=0                                    #data sent
+        #self.main_status=0
         print_to_log('send_status=={}'.format(self.send_status),'sent EOT')
         print_to_log('main_status=={}'.format(self.main_status),'connection is now, neutral')
         #write end
@@ -139,8 +149,8 @@ class astms(astmg.astmg, file_mgmt):
       self.error_set=self.read_set.union(self.write_set)    #update error set
       self.write_msg=b'\x04'                                #set message EOT
       self.archive_outbox_file()
-      #self.send_status=0                                    #only when actually sent
-      #self.main_status=0
+      self.send_status=0                                    #dat sent
+      self.main_status=0
       print_to_log('send_status=={}'.format(self.send_status),'initiate_write() sent EOT')
       print_to_log('main_status=={}'.format(self.main_status),'initiate_write() now, neutral')
       #write end        
@@ -161,7 +171,7 @@ class astms(astmg.astmg, file_mgmt):
         self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
         self.error_set=self.read_set.union(self.write_set)    #update error set
         self.write_msg=b'\x05'                                #set message ENQ
-        #self.send_status=1                                    #status to ENQ sent only when written
+        self.send_status=1                                    #status to ENQ sent
         print_to_log('send_status=={}'.format(self.send_status),'initiate_write() sent ENQ to write buffer')
         signal.alarm(self.alarm_time) #wait for receipt of 1st ACK
       else:
@@ -183,17 +193,9 @@ class astms(astmg.astmg, file_mgmt):
     self.error_set=self.read_set.union(self.write_set)    #update error set
     
     #specific code for ASTM status update
-    if(self.write_msg==b'\x04'):      #if EOT sent
+    if(self.write_msg==b'\x04'):
       self.main_status=0
-      self.send_status=0
-    if(self.write_msg[-1:]==b'\x0a'): #if main message sent
-      self.send_status=3
-    if(self.write_msg==b'\x05'):      #if enq sent
-      self.send_status=1
-    if(self.write_msg==b'\x15'):      #if NAK sent = EOT sent
-      self.main_status=0
-      self.send_status=0
-      
+       
   #######Specific funtions for ASTM        
   def get_checksum(self,data):
     checksum=0
