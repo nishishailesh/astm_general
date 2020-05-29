@@ -141,21 +141,24 @@ class astm_file_xl1000(astm_file):
     ^^^ALB`^^^CRR`
     
     b'^^^'+'`^^^'.join(('ALB','CRR')).encode()+b'`'
-    '''
     
-    '''
-    A : Add the requested tests or batteries to the existing sample, if in response to query??
-    N : New requests accompanying a new sample, if totally new??
+    ex_code^03 = 5-7 ml, -1=10 ml, others are not barcoded
+    
+    A : Add the requested tests or batteries to the existing sample
+    N : New requests accompanying a new sample
+    P : Pending sample (Add but don't schedule)
+    C : Cancel request for the battery or tests named (Delete Test)
+
     '''
     
     ex_code_str=b'^^^'+'`^^^'.join(requested_examination_code).encode()+b'`'
     
     
-    frame_number=1
+    #frame_number=1 in headerline, but not used, because only one frame(STX-ETX-LF will be sent per EOT)
     print_to_log('seperators ',self.s1)
     header_line=  b'1H'+self.s1.encode()+self.s2.encode()+self.s3.encode()+self.s4.encode()+b'|||cl_general'
     patient_line= b'P|1|||||||'
-    order_line=   b'O|1|'+sample_id.encode()+b'^03||'+ex_code_str+b'|R||||||A||||serum'
+    order_line=   b'O|1|'+sample_id.encode()+b'^03||'+ex_code_str+b'|R||||||N||||serum'
     terminator_line=b'L|1N'
     
     str_for_checksum=b'\x02'+header_line+b'\x0d'+patient_line+b'\x0d'+order_line+ b'\x0d'+terminator_line+ b'\x0d\x03'
