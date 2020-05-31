@@ -34,7 +34,7 @@ class astms(astmg.astmg, file_mgmt):
   #read from enq to eot in single file
   #it will have stx->lf segments, with segment number 1...7..0..7
   def manage_read(self,data):
-
+    #EOF is handled in base class
     #for receiving data
     if(data==b'\x05'):
       signal.alarm(0)      

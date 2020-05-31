@@ -54,7 +54,7 @@ class astm_file_xl1000(astm_file):
           examination_id=self.get_eid_for_sid_code(con,sample_id,ex_code)
           if(examination_id==False):
             msg="Skipping the while loop once"
-            print_to_log(msg)
+            print_to_log(msg,' .. because no eid for this sid and this code')
             continue
           msg='{}={}'.format(examination_id,ex_result)
           print_to_log('examination_id={}'.format(examination_id),'ex_result={}'.format(ex_result))

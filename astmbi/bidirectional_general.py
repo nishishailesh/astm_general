@@ -112,11 +112,15 @@ class astmg(object):
 
       if(self.s in self.exceptional):
         print_to_log(self.s,'some error on socket s. quitting')
-        quit() 
+        self.s.shutdown(socket.SHUT_RDWR)
+        self.s.close()
+        break 
 
       if(self.s in self.writable):
         print_to_log(self.s,'Can not understand why s is writting')
-        quit() 
+        self.s.shutdown(socket.SHUT_RDWR)
+        self.s.close()
+        break 
 
       if(self.s in self.readable):
         dummy_conn = self.s.accept()
@@ -127,7 +131,9 @@ class astmg(object):
       ###For client do work
       if(self.conn[0] in self.exceptional):
         print_to_log(self.conn[0],'some error on socket conn. quitting')
-        quit() 
+        self.s.shutdown(socket.SHUT_RDWR)
+        self.s.close()
+        break 
 
       if(self.conn[0] in self.writable):
         #sending message (somewhere else conn[0] was added in writable and self.write_msg was given value
@@ -135,12 +141,20 @@ class astmg(object):
         self.manage_write() 
                        
       if(self.conn[0] in self.readable):
-        print_to_log(self.conn[0],'Conn have sent some data using recv() and manage_read()')
-        data=self.conn[0].recv(1024)
-        print_to_log('Following is received:',data)  
-        self.manage_read(data)
-          
-          
+        print_to_log(self.conn[0],'Conn have sent some data. now using recv() and manage_read()')
+        try:
+          data=self.conn[0].recv(1024)
+          print_to_log('Following is received:',data)  
+          self.manage_read(data)
+        except Exception as my_exception:      
+          print_to_log(my_exception,'recv() failed. something sent and then connection closed') 
+          self.s.shutdown(socket.SHUT_RDWR)
+          self.s.close()
+          '''to prevent: DEBUG:root:[Errno 110] Connection timed out recv() failed. something sent and then connection closed
+          DEBUG:root:[Errno 98] Address already in use bind() failed, ip/port correct??Quitting'''
+          break
+
+        #only EOF is handled here, rest is handled in manage_read()
         #if EOF 1)close socket 2)remove from list 3)accept new
         if(data==b''):
           print_to_log(self.conn[0],'Conn have closed, accepting new connection')
@@ -161,7 +175,7 @@ class astmg(object):
           #finally error_set
           self.error_set=self.read_set.union(self.write_set)
           
-          #3) Accept new, add to read set
+          #3) Accept new, add to read set, this is blocking here. No need to go for initiate_write, because nothing to do
           self.conn = self.s.accept()
           print_to_log(self.s,'New Connection request is read')  
           self.conn[0].setblocking(0)
