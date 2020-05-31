@@ -1,0 +1,10 @@
+[Unit]
+Description=Read+Write data from inbox/outbox to mysql using ASTM format
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/root/xl_1000/astmbi/astm_file2mysql_bidirectional_xl_1000.py
+
+[Install]
+WantedBy=multi-user.target

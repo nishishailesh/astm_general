@@ -1,0 +1,10 @@
+[Unit]
+Description=Read+Write data from Erba XL-1000 to/from inbox/outbox using ASTM Protocol
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/root/xl_1000/astmbi/astm_bidirectional_xl_1000.py
+
+[Install]
+WantedBy=multi-user.target

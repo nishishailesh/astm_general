@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-astm_log_filename='/var/log/astm_bidirectional.log'
-file2mysql_log_filename='/var/log/astm_file2mysql.log'
+astm_log_filename='/var/log/xl_1000_read.log'
+file2mysql_log_filename='/var/log/xl_1000_write.log'
 #host_address='12.207.3.240'
 #host_address='11.207.1.1'
 host_address=''
