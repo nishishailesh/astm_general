@@ -1,0 +1,19 @@
+#!/usr/bin/python3
+my_user='xyz'
+my_pass='xyz'
+my_host='127.0.0.1'
+my_db='cl_general'
+
+'''
+change and save this file in a folder away from main program
+rename if required (e.g astm_var.py)
+The same needs to be changed in file which subclass the "class astm_file"
+(e.g astm_file2mysql_bidirectional_xl_1000.py)
+
+
+#For mysql password
+sys.path.append('/var/gmcs_config')
+import astm_var
+
+
+'''
