@@ -101,7 +101,7 @@ class astms(astmg.astmg, file_mgmt):
         #data must not be >1024
         #it will be ETX data , not ETB data
         #Frame number will always be one and only one
-        byte_data=fd.read(1024)                               
+        byte_data=fd.read(2024)                               
         
         print_to_log('File Content',byte_data)
         chksum=self.get_checksum(byte_data)

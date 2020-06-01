@@ -143,7 +143,7 @@ class astmg(object):
       if(self.conn[0] in self.readable):
         print_to_log(self.conn[0],'Conn have sent some data. now using recv() and manage_read()')
         try:
-          data=self.conn[0].recv(1024)
+          data=self.conn[0].recv(2024)
           print_to_log('Following is received:',data)  
           self.manage_read(data)
         except Exception as my_exception:      
