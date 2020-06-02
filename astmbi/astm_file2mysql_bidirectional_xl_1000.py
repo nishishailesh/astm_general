@@ -84,7 +84,7 @@ class astm_file_xl1000(astm_file):
           #Q|1|^1007149`1007152`1007151`1007150`1007148|||S|||||||O
           #in R record it is plain
           #sample_id=each_sample[0].split(self.s3)[1]
-          sample_id_list=each_sample[0].split(self.s3)[1].split(self.s3)
+          sample_id_list=each_sample[0].split(self.s3)[1].split(self.s2)
           print_to_log('sample_id_list:',sample_id_list)
 
           for sample_id in sample_id_list:
