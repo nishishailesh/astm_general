@@ -111,7 +111,7 @@ class astms(astmg.astmg, file_mgmt):
         #self.send_status=3       
         #data sent -> change status only when really data of stx-lf or anyother-inappropriate frame really sent
         
-        print_to_log('send_status=={}'.format(self.send_status),'changed send_status to 3 (data sent to write buffer)')
+        #print_to_log('send_status=={}'.format(self.send_status),'changed send_status to 3 (data sent to write buffer)')
         #writing end
         signal.alarm(self.alarm_time) #wait for receipt of second ack
         
@@ -127,8 +127,8 @@ class astms(astmg.astmg, file_mgmt):
         self.archive_outbox_file()                            
         #self.send_status=0                                    #change only where actually sent
         #self.main_status=0                                   #change only where actually sent
-        print_to_log('send_status=={}'.format(self.send_status),'sent EOT')
-        print_to_log('main_status=={}'.format(self.main_status),'connection is now, neutral')
+        #print_to_log('send_status=={}'.format(self.send_status),'sent EOT')
+        #print_to_log('main_status=={}'.format(self.main_status),'connection is now, neutral')
         #write end
         #alarm not required, no expectation signal.alarm(self.alarm_time) 
         signal.alarm(self.alarm_time) #when EOT is really sent, change status, or if nothing is sent change status using alarm
@@ -182,8 +182,8 @@ class astms(astmg.astmg, file_mgmt):
   def manage_write(self):      
     #common code
     #Send message in response to write_set->select->writable initiated by manage_read() and initiate_write()
-    print_to_log('Following will be sent',self.write_msg) 
-    self.conn[0].send(self.write_msg)                     
+    print_to_log('Following will be sent',self.write_msg)
+    self.conn[0].send(self.write_msg)
     self.write_set.remove(self.conn[0])                   #now no message pending, so remove it from write set
     self.error_set=self.read_set.union(self.write_set)    #update error set
     
@@ -193,15 +193,27 @@ class astms(astmg.astmg, file_mgmt):
     if(self.write_msg==b'\x04'):      #if EOT sent
       self.main_status=0
       self.send_status=0
+      print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'.. because EOT is sent') 
+      signal.alarm(0)
+      print_to_log('Neutral State','.. so stopping alarm') 
     elif(self.write_msg[-1:]==b'\x0a'): #if main message sent
       self.send_status=3
+      print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'.. because message is sent(LF)') 
     elif(self.write_msg==b'\x05'):      #if enq sent
       self.send_status=1
+      print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'.. because ENQ is sent') 
+    elif(self.write_msg==b'\x06'):      #if ack sent
+      print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'.. no change in status ACK is sent') 
+
     elif(self.write_msg==b'\x15'):      #if NAK sent = EOT sent
       self.main_status=0
       self.send_status=0
+      print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'.. because NAK is sent. going neutral') 
+      signal.alarm(0)
+      print_to_log('Neutral State','.. so stopping alarm') 
     else:                               #if data stream is incomplate/inappropriate containing EOT etc
       self.send_status=3
+      print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'.. incomplate message (without LF) sent. EOT will be sent in next round') 
 
   #######Specific funtions for ASTM        
   def get_checksum(self,data):
