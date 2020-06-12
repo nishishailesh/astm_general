@@ -158,10 +158,7 @@ class astm_file_xl1000(astm_file):
     print_to_log('seperators ',self.s1)
     header_line=  b'1H'+self.s1.encode()+self.s2.encode()+self.s3.encode()+self.s4.encode()+b'|||cl_general'
     patient_line= b'P|1|||||||'
-    #order_line=   b'O|1|'+sample_id.encode()+b'^01||'+ex_code_str+b'|R||||||N||||serum'
-    #order_line=   b'O|1|'+sample_id.encode()+b'^02||'+ex_code_str+b'|R||||||N||||serum'
     order_line=   b'O|1|'+sample_id.encode()+b'^03||'+ex_code_str+b'|R||||||N||||serum'
-    #order_line=   b'O|1|'+sample_id.encode()+b'||'+ex_code_str+b'|R||||||N||||serum'
     terminator_line=b'L|1N'
     
     str_for_checksum=b'\x02'+header_line+b'\x0d'+patient_line+b'\x0d'+order_line+ b'\x0d'+terminator_line+ b'\x0d\x03'
