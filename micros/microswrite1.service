@@ -1,0 +1,10 @@
+[Unit]
+Description=Writes Mircos-60 inbox1 data to mysql database
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/root/micros-connect/file2mysql_inbox1.py
+
+[Install]
+WantedBy=multi-user.target

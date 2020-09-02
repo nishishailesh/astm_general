@@ -72,21 +72,22 @@ class old_LIS(astmg.astm_file):
       for each_record in each_sample[1]:
         logging.debug(each_record)
         if(each_record[0]=='R'):
-          ex_code=each_record[2].split(self.s3)[3]
-          ex_result=each_record[3]
-          msg='{}={}'.format(ex_code,ex_result)
-          logging.debug(msg)
-          data_tpl=(ex_result,sample_id,ex_code)
-          try:
-            #def run_query(self,con,prepared_sql,data_tpl):
-            con=self.get_link(my_host,my_user,my_pass,my_db)
-            self.run_query(con,prepared_sql,data_tpl)
-            msg='x:update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
-            logging.critical(msg)
-          except Exception as my_ex:
-            msg='y:update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
-            logging.critical(msg)
-            print_to_log('update query error:',my_ex)
+          if(each_record[1]=='1'):  #ignore if '2' (specific for abbot architect machines, '2' have absorbance, '1' have results)
+            ex_code=each_record[2].split(self.s3)[3]
+            ex_result=each_record[3]
+            msg='{}={}'.format(ex_code,ex_result)
+            logging.debug(msg)
+            data_tpl=(ex_result,sample_id,ex_code)
+            try:
+              #def run_query(self,con,prepared_sql,data_tpl):
+              con=self.get_link(my_host,my_user,my_pass,my_db)
+              self.run_query(con,prepared_sql,data_tpl)
+              msg='x:update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
+              logging.critical(msg)
+            except Exception as my_ex:
+              msg='y:update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
+              logging.critical(msg)
+              print_to_log('update query error:',my_ex)
           
 while True:
   m=old_LIS(inbox,archived)

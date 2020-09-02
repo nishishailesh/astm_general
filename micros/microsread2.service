@@ -1,0 +1,10 @@
+[Unit]
+Description=Reads data from Mircos-60 ttyS2
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/root/micros-connect/stxetxcut_ttyS2.py
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,25 @@
+# stxetxmysql
+
+to start verious services
+
+copy following files in respective locations
+root@localhost:~/backup.patho/script.patho# ls /lib/systemd/system/micros* -l
+-rw-r--r-- 1 root root 186 Jan  9 12:36 /lib/systemd/system/microsread0.service
+-rw-r--r-- 1 root root 186 Jan  9 12:11 /lib/systemd/system/microsread1.service
+-rw-r--r-- 1 root root 186 Jan  9 12:11 /lib/systemd/system/microsread2.service
+-rw-r--r-- 1 root root 203 Jan  9 12:37 /lib/systemd/system/microswrite0.service
+-rw-r--r-- 1 root root 203 Jan  9 12:13 /lib/systemd/system/microswrite1.service
+-rw-r--r-- 1 root root 203 Jan  9 12:13 /lib/systemd/system/microswrite2.service
+
+
+enable services
+
+systemctl daemon-reload
+systemctl enable microswrite0
+systemctl enable microswrite1
+systemctl enable microswrite2
+systemctl enable microsread0
+systemctl enable microsread1
+systemctl enable microsread2
+
+This project handles three ports ttyS0, ttyS1, ttyS2

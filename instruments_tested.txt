@@ -1,0 +1,17 @@
+===Following equipments are tested with this program===
+Unidirectional
+	Erba XL-300
+	Erba XL-640
+	Erba XL-1000
+	Micros-60 Hematology analyser (ABX Format, not ASTM)
+	Horiba Yumizen P500 five part hematology analyser
+	Horiba pentra XLR hematology analyser
+	Abott Architech clinical chemistry
+Bidirectional
+	Erba XL-1000
+	
+	
+Note: 
+	1. For each of the above equipment, there are specific python sript to store results to mysql database
+	2. These file2mysql type of scripts must be modified to suit LIS database requirements
+
