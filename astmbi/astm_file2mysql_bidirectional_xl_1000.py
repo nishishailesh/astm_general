@@ -50,7 +50,8 @@ class astm_file_xl1000(astm_file):
           ex_code=each_record[2].split(self.s3)[3]
           ex_result=each_record[3]
           
-          uniq=each_record[12]
+          #uniq=each_record[12]
+          uniq='{}{}'.format(each_record[12],'|XL_1000')
           examination_id=self.get_eid_for_sid_code(con,sample_id,ex_code)
           if(examination_id==False):
             msg="Skipping the while loop once"
