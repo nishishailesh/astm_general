@@ -1,0 +1,10 @@
+total 80
+-rw-r--r-- 1 root root  3206 Oct 26 23:11 astm_bidirectional_common.py
+-rw-r--r-- 1 root root   457 Oct 26 23:11 astm_bidirectional_conf.py
+-rwxr-xr-x 1 root root 12888 Oct 26 23:11 astm_bidirectional_general.py
+-rwxr-xr-x 1 root root 12888 Oct 26 23:36 astm_bidirectional_xl_1000.py
+-rwxr-xr-x 1 root root 11577 Oct 26 23:29 astm_file2mysql_bidirectional_general.py
+-rwxr-xr-x 1 root root  9310 Oct 26 23:11 astm_file2mysql_bidirectional_xl_1000.py
+-rw-r--r-- 1 root root  8937 Oct 26 23:11 bidirectional_general.py
+-rw-r--r-- 1 root root     0 Oct 26 23:36 file.details
+drwxr-xr-x 3 root root  4096 Oct 26 23:21 misc

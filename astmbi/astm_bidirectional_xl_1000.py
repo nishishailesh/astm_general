@@ -3,7 +3,6 @@ import bidirectional_general as astmg
 import astm_bidirectional_conf as conf
 import fcntl, signal, logging
 
-from astm_bidirectional_common import my_sql
 from astm_bidirectional_common import file_mgmt
 
 class astms(astmg.astmg, file_mgmt):
@@ -183,10 +182,17 @@ class astms(astmg.astmg, file_mgmt):
     #common code
     #Send message in response to write_set->select->writable initiated by manage_read() and initiate_write()
     print_to_log('Following will be sent',self.write_msg)
-    self.conn[0].send(self.write_msg)
+
+    try:
+      self.conn[0].send(self.write_msg)
+      self.write_msg=''
+    except Exception as my_ex :
+      print_to_log("Disconnection from client?",my_ex)                    
+
     self.write_set.remove(self.conn[0])                   #now no message pending, so remove it from write set
     self.error_set=self.read_set.union(self.write_set)    #update error set
-    
+
+   
     #specific code for ASTM status update
     #if sending: ENQ, ...LF, EOT is sent
     #ff receiving: ACK, NAK sent (ACK seding donot need to change status, it activates only alarm
@@ -278,7 +284,8 @@ def print_to_log(object1,object2):
 #Main Code###############################
 #use this to device your own script
 if __name__=='__main__':
-  logging.basicConfig(filename=conf.astm_log_filename,level=logging.DEBUG)  
+  logging.basicConfig(filename=conf.astm_log_filename,level=logging.DEBUG,format='%(asctime)s : %(message)s')  
+ 
   #print('__name__ is ',__name__,',so running code')
   while True:
     m=astms()

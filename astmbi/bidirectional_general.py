@@ -37,6 +37,7 @@ class astmg(object):
   def manage_read(self,data):
     self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
     self.error_set=self.read_set.union(self.write_set)    #update error set
+    #demo reply for apple and pineapple, use socat - tcp:127.0.0.1:2576
     if(data==b'pineapple\n'):
       self.write_msg=b'Demo manage_read() override me. pinapple is yellow\n'  
     if(data==b'apple\n'):
@@ -48,7 +49,11 @@ class astmg(object):
   def manage_write(self):      
     #Send message in response to write_set->select->writable initiated by manage_read() and initiate_write()
     print_to_log('Following will be sent',self.write_msg) 
-    self.conn[0].send(self.write_msg)                     
+    try:
+      self.conn[0].send(self.write_msg)
+      self.write_msg=''
+    except Exception as my_ex :
+      print_to_log("Disconnection from client?",my_ex)                    
     self.write_set.remove(self.conn[0])                   #now no message pending, so remove it from write set
     self.error_set=self.read_set.union(self.write_set)    #update error set
 
@@ -59,7 +64,9 @@ class astmg(object):
   def initiate_write(self):
     self.write_set.add(self.conn[0])                      #Add in write set, for next select() to make it writable
     self.error_set=self.read_set.union(self.write_set)    #update error set
-    self.write_msg=b'Demo initiate_write() override me. send apple, pineapple \n' #set message
+    if(len(self.write_msg)==0):
+      self.write_msg=b'Demo initiate_write() override me. send apple, pineapple \n' #set message
+    time.sleep(1)	#This is demo function. It will write a lot. So, better to pause a bit
           
   def __init__(self):
     #logging.basicConfig(filename=conf.log_filename,level=logging.CRITICAL)
@@ -143,7 +150,7 @@ class astmg(object):
       if(self.conn[0] in self.readable):
         print_to_log(self.conn[0],'Conn have sent some data. now using recv() and manage_read()')
         try:
-          data=self.conn[0].recv(2024)
+          data=self.conn[0].recv(1024)
           print_to_log('Following is received:',data)  
           self.manage_read(data)
         except Exception as my_exception:      
@@ -160,9 +167,12 @@ class astmg(object):
           print_to_log(self.conn[0],'Conn have closed, accepting new connection')
           
           #1) close socket
-          self.conn[0].shutdown(socket.SHUT_RDWR)
-          self.conn[0].close()
-          
+          try:
+            self.conn[0].shutdown(socket.SHUT_RDWR)
+            self.conn[0].close()
+          except Exception as my_ex:
+            print_to_log('Connection from client closed??',my_ex)  
+			  
           #2)remove from read list
           
           #no if:() for read_set because, we reached here due to its presence in read_set
@@ -190,8 +200,8 @@ def print_to_log(object1,object2):
 #Main Code###############################
 #use this to device your own script
 if __name__=='__main__':
-  logging.basicConfig(filename=conf.astm_log_filename,level=logging.DEBUG)  
-  
+  logging.basicConfig(filename=conf.astm_log_filename,level=logging.DEBUG,format='%(asctime)s : %(message)s')  
+
   #print('__name__ is ',__name__,',so running code')
   while True:
     m=astmg()
