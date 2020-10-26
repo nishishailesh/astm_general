@@ -186,6 +186,9 @@ class astm_file(file_mgmt,my_sql):
         self.relevant_data=self.relevant_data+[chr(ord(data))]
         
   def send_to_mysql(self):
+    #sql='insert into primary_result_blob (sample_id,examination_id,result,uniq) values (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE result=%s'
+    #data_tpl=(self.abx_result[30].rstrip(' '),key,self.abx_result[key],self.abx_result[26],self.abx_result[key])
+    #run_query(sql,data_tpl)
     pass #useful during debugging
     
 

@@ -31,12 +31,12 @@ my_pass=astm_var.my_pass
 my_db='biochemistry'
 
 #Step:2 Create inbox and archived folders as follows
-inbox='/root/ashish/in/'
-archived='/root/ashish/out/'
+inbox='/root/ashish.data/'
+archived='/root/ashish.arch/'
 log_filename='/var/log/ashish.log'
 
 #Step:3
-# run file ./erba_old_LIS_file2mysql.py
+# run file ./elba_old_LIS_file2mysql.py
 # see out put "tail -f /var/log/ashish.log
 #see database updation in LIS
 
@@ -56,19 +56,20 @@ logging.basicConfig(filename=log_filename,level=logging.DEBUG)
 if log==0:
   logging.disable(logging.CRITICAL)
 
-def print_to_log(object1,object2):
-  logging.debug('{} {}'.format(object1,object2))
+
 
 class old_LIS(astmg.astm_file):
   def send_to_mysql(self):
+    con=self.get_link(my_host,my_user,my_pass,my_db)
     prepared_sql='update examination set result=%s where sample_id=%s and code=%s'
     for each_sample in self.final_data:
       sample_id=each_sample[0]
       logging.debug(sample_id)
+
       if(sample_id.rstrip(' ').isnumeric() == False):
         logging.debug('sample_id is not number')
         return False;
-      
+              
       for each_record in each_sample[1]:
         logging.debug(each_record)
         if(each_record[0]=='R'):
@@ -77,17 +78,16 @@ class old_LIS(astmg.astm_file):
           msg='{}={}'.format(ex_code,ex_result)
           logging.debug(msg)
           data_tpl=(ex_result,sample_id,ex_code)
-          try:
-            #def run_query(self,con,prepared_sql,data_tpl):
-            con=self.get_link(my_host,my_user,my_pass,my_db)
-            self.run_query(con,prepared_sql,data_tpl)
-            msg='x:update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
+          try:          
+            cur=self.run_query(con,prepared_sql,data_tpl)
+            msg='update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
+            logging.debug(msg)
+            logging.debug(cur)
+            self.close_cursor(cur)
+          except:
+            msg='update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
             logging.critical(msg)
-          except Exception as my_ex:
-            msg='y:update examination set result="{}" where sample_id="{}" and code="{}"'.format(ex_result,sample_id,ex_code)
-            logging.critical(msg)
-            print_to_log('update query error:',my_ex)
-          
+    self.close_link(con)
 while True:
   m=old_LIS(inbox,archived)
   if(m.get_first_file()):
@@ -98,4 +98,3 @@ while True:
     m.archive_file()
   time.sleep(1)
   
-

@@ -1,9 +1,35 @@
 #!/usr/bin/python3
 import os, fcntl,shutil,datetime, logging
 import astm_bidirectional_conf as conf
+import MySQLdb
 
-from azure.iot.device import IoTHubDeviceClient, Message
+class my_sql(object):
+  def get_link(self,my_host,my_user,my_pass,my_db):
+    con=MySQLdb.connect(my_host,my_user,my_pass,my_db)
+    logging.debug(con)
+    if(con==None):
+      if(debug==1): logging.debug("Can't connect to database")
+    else:
+      pass
+      logging.debug('connected')
+      return con
 
+  def run_query(self,con,prepared_sql,data_tpl):
+    cur=con.cursor()
+    cur.execute(prepared_sql,data_tpl)
+    con.commit()
+    msg="rows affected: {}".format(cur.rowcount)
+    logging.debug(msg)
+    return cur
+
+  def get_single_row(self,cur):
+    return cur.fetchone()
+
+  def close_cursor(self,cur):
+    cur.close()
+
+  def close_link(self,con):
+    con.close()
 
 #logging defined in child class, illogical
 class file_mgmt(object):
@@ -69,25 +95,6 @@ class file_mgmt(object):
   def archive_inbox_file(self):
     shutil.move(self.inbox_data+self.current_inbox_file, self.inbox_arch+self.current_inbox_file)
 
-#########PREPARATION############
-#az iot hub monitor-events --hub-name DragonflyPHD-IoT-Hub
-#tsql -H url -p 1433 -U user -P password -D database
-#apt install python3-pip python3-setuptools
-#pip3 install azure-iot-device
 
-class  my_hub():
-  def __init__(self,CONNECTION_STRING):
-    self.client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING)
-
-  def send_to_hub(self,str):
-    try:
-      print_to_log( "Sending message:",str)
-      self.client.send_message(Message(str))
-      print_to_log( "Message successfully sent" ,'No error')
-      return True
-    except Exception as my_ex:  
-      print_to_log( "Message not sent" ,my_ex)
-      return False
-      
 def print_to_log(object1,object2):
   logging.debug('{} {}'.format(object1,object2))
