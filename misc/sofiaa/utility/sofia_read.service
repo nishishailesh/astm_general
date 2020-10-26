@@ -1,0 +1,10 @@
+[Unit]
+Description=excahnge data between ASTM-complient-equipment and inbox/outbox using ASTM Protocol
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/root/sofia/astm_bidirectional_general.py
+
+[Install]
+WantedBy=multi-user.target

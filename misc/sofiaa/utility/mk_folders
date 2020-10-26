@@ -1,0 +1,4 @@
+mkdir /root/sofia.inbox.data/
+mkdir /root/sofia.inbox.arch/
+mkdir /root/sofia.outbox.data/
+mkdir /root/sofia.outbox.arch/

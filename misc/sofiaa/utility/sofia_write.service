@@ -1,0 +1,10 @@
+[Unit]
+Description=exchange data of inbox/outbox with mssql parsing ASTM format
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/root/sofia/astm_file2mssql_bidirectional_sofia.py
+
+[Install]
+WantedBy=multi-user.target

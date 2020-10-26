@@ -1,0 +1,102 @@
+copy entire program to /root folder
+files as as follows
+
+/root/sofia:
+total 60
+-rwxr-xr-x 1 root root  3255 Oct 18 23:54 astm_bidirectional_common.py
+-rwxr-xr-x 1 root root   454 Oct 18 23:54 astm_bidirectional_conf.py
+-rwxr-xr-x 1 root root 12744 Oct 18 23:57 astm_bidirectional_general.py
+-rwxr-xr-x 1 root root 11799 Oct 18 23:54 astm_file2mssql_bidirectional_general.py
+-rwxr-xr-x 1 root root  1140 Oct 18 23:54 astm_file2mssql_bidirectional_sofia.py
+-rwxr-xr-x 1 root root  8502 Oct 18 23:54 bidirectional_general.py
+drwxr-xr-x 3 root root  4096 Oct 19 00:20 utility
+
+/root/sofia/utility:
+total 32
+-rwxr-xr-x 1 root root   99 Oct 18 23:54 COPY_SERVICE.sh
+-rwxr-xr-x 1 root root   440 Oct 18 23:57 astm_var.py.example
+drwxr-xr-x 2 root root 4096 Oct 19 00:17 data
+-rw-r--r-- 1 root root   37 Oct 19 00:20 install_help.txt
+-rwxr-xr-x 1 root root   91 Oct 18 23:54 INSTALL_SERVICE.sh
+-rwxr-xr-x 1 root root  122 Oct 18 23:54 mk_folders
+-rwxr-xr-x 1 root root  160 Oct 18 23:54 reset_everything.sh
+-rwxr-xr-x 1 root root  240 Oct 18 23:54 sofia_read.service
+-rwxr-xr-x 1 root root  226 Oct 18 23:54 sofia_write.service
+/root/sofia/utility/data:
+total 96
+-rw-r--r-- 1 root root 195 Oct 18 23:55 2020-09-28-13-36-06-026795
+...
+...(many other files in this folder)
+
+run following commands
+	apt install python3-pip
+	pip3 install azure-iot-device
+
+
+create a file /var/astm_var.py
+	It should have CONNECTION_STRING variable defined
+	See astm_var.py.example in sofia/utility folder
+
+run following commands form utility subfolder
+	mk_folders
+	COPY_SERVICE.sh
+	INSTALL_SERVICE.sh
+	reset_everything.sh
+
+Output of reset_everything.sh is shown below. Both services should have active status	
+
+ sofia_read.service - excahnge data between ASTM-complient-equipment and inbox/outbox using ASTM Protocol
+   Loaded: loaded (/lib/systemd/system/sofia_read.service; enabled; vendor preset: enabled)
+   Active: active (running) since Mon 2020-10-19 00:25:37 IST; 29ms ago
+ Main PID: 10561 ((neral.py))
+    Tasks: 1 (limit: 2094)
+   Memory: 72.0K
+   CGroup: /system.slice/sofia_read.service
+           └─10561 (neral.py)
+
+Oct 19 00:25:37 debian systemd[1]: Started excahnge data between ASTM-complient-equipment and inbox/outbox using ASTM Protocol.
+ sofia_write.service - exchange data of inbox/outbox with mssql parsing ASTM format
+   Loaded: loaded (/lib/systemd/system/sofia_write.service; enabled; vendor preset: enabled)
+   Active: active (running) since Mon 2020-10-19 00:25:35 IST; 2s ago
+ Main PID: 10534 (astm_file2mssql)
+    Tasks: 4 (limit: 2094)
+   Memory: 15.4M
+   CGroup: /system.slice/sofia_write.service
+           └─10534 /usr/bin/python3 /root/sofia/astm_file2mssql_bidirectional_sofia.py
+
+
+run following command
+	ps aux|grep astm
+
+following is output. Note two programs running
+root@debian:~/sofia/utility# ps aux|grep astm
+root     10534  0.1  1.2 253340 23160 ?        Ssl  00:25   0:00 /usr/bin/python3 /root/sofia/astm_file2mssql_bidirectional_sofia.py
+root     10561  0.0  1.2  31884 23024 ?        Ss   00:25   0:00 /usr/bin/python3 /root/sofia/astm_bidirectional_general.py
+root     10599  0.0  0.0   6076   884 pts/1    S+   00:32   0:00 grep astm
+root@debian:~/sofia/utility# 
+
+
+Setting equipment
+================
+	Give static IP to server running sofia program
+	Default port configured in software is 2576
+	To change, edit astm_bidirectional_conf.py
+
+
+checking program
+================
+ASTM read program
+	Read ASTM data and write a file to a folder
+	Require actual equipment
+	See incoming files saved in sofia.inbox.data file
+
+ASTM write program
+	Reads files from sofia.inbox.data, sends to azure-iot and move file to archive folder
+	Transfer some files (ASTM) from utility/data folder to sofia.inbox.data
+	install tsql as follows
+	root@debian:~/sofia# apt install freetds-bin
+	Run TSQL program as follows
+	root@debian:~/sofia# tsql -H dragonflyphd.database.windows.net -p 1433 -U DragonflyPHD -P PASSWORD -D DragonflyPHD
+	run following sql
+	select count(id) from astm_data
+	There will be increase in id counts on successful operations

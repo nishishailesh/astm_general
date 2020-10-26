@@ -1,0 +1,22 @@
+#!/usr/bin/python3
+#For mysql/ms_sql
+my_user='xyz'
+my_pass='xyz'
+my_host='127.0.0.1'
+my_db='db_name'
+#for azure
+CONNECTION_STRING = "XYZ"
+
+'''
+change and save this file in a folder away from main program
+rename if required (e.g astm_var.py)
+The same needs to be changed in file which subclass the "class astm_file"
+(e.g astm_file2mysql_bidirectional_sofia.py)
+
+
+#For mysql password
+sys.path.append('/var/gmcs_config')
+import astm_var
+
+
+'''
