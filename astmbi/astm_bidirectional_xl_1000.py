@@ -185,7 +185,7 @@ class astms(astmg.astmg, file_mgmt):
 
     try:
       self.conn[0].send(self.write_msg)
-      self.write_msg=''
+      #self.write_msg=''
     except Exception as my_ex :
       print_to_log("Disconnection from client?",my_ex)                    
 
@@ -210,7 +210,6 @@ class astms(astmg.astmg, file_mgmt):
       print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'.. because ENQ is sent') 
     elif(self.write_msg==b'\x06'):      #if ack sent
       print_to_log('main_status={} send_status={}'.format(self.main_status,self.send_status),'.. no change in status ACK is sent') 
-
     elif(self.write_msg==b'\x15'):      #if NAK sent = EOT sent
       self.main_status=0
       self.send_status=0

@@ -1,0 +1,10 @@
+[Unit]
+Description=Read+Write data from inbox/outbox to mysql using ASTM format
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/root/vitros/astmbi/astm_file2mysql_bidirectional_cl_general_vitros.py
+
+[Install]
+WantedBy=multi-user.target
