@@ -133,27 +133,6 @@ class astm_file_xl1000(astm_file):
     self.close_link(con)
 
   def make_order(self,sample_id,requested_examination_code):
-    '''
-    <STX>1H|`^&|||MBDC_Online ^V2.11<CR> 
-    P|1|0081692|7||Neumann-Raber^Jurg||19330401|M<CR>  
-    O|1|00176860^01||^^^SGPTD`^^^SGOTD`|R||20100607074420[T1] ||||A||||Serum<CR>  
-    L|1N<CR><ETX>1D<CR><LF>
-    '''
-    
-    '''
-    '^^^'+'`^^^'.join(('ALB','CRR'))+'`'
-    ^^^ALB`^^^CRR`
-    
-    b'^^^'+'`^^^'.join(('ALB','CRR')).encode()+b'`'
-    
-    ex_code^03 = 5-7 ml, -1=10 ml, others are not barcoded
-    
-    A : Add the requested tests or batteries to the existing sample
-    N : New requests accompanying a new sample
-    P : Pending sample (Add but don't schedule)
-    C : Cancel request for the battery or tests named (Delete Test)
-
-    '''
     #for Vitros
     #^^^1.0000+002+1.0 ^^^manualDil+testcode+autodilu~testcode+autodilu~testcode+autodilu
     three_caret=self.s3*3
@@ -166,22 +145,38 @@ class astm_file_xl1000(astm_file):
     time_now=dt.strftime("%Y%m%d%H%M%S")
 
     #frame_number=1 in headerline, but not used, because only one frame(STX-ETX-LF will be sent per EOT)
-    print_to_log('seperators ',self.s1+self.s2+self.s3+self.s4)
-    header_line=  b'1H'+self.s1.encode()+self.s2.encode()+self.s3.encode()+self.s4.encode()+b'|||3600796||||||||LIS2-A|'+time_now.encode()
-    #2P|1|BCH0637460|||RUPANIBABYOFKAMINI^^|||F
-    patient_line= b'2P|1|NOPID|||NONAME^^|||F'
     #5 = serum for vitros
-    #order_line=   b'O|1|'+sample_id.encode()+b'||'+ex_code_str+b'|R||||||N||||5'
-    order_line=   b'3O|1|'+sample_id.encode()+b'||'+ex_code_str+b'|R||'+time_now.encode()+b'||||N||||5||||||||||O'
-    terminator_line=b'4L|1|N'
     
+    print_to_log('seperators ',self.s1+self.s2+self.s3+self.s4)
+    
+    #Old
+    '''
+    header_line=  b'1H'+self.s1.encode()+self.s2.encode()+self.s3.encode()+self.s4.encode()+b'|||3600796||||||||LIS2-A|'+time_now.encode()
+    patient_line= b'2P|1|NOPID|||NONAME^^|||F'
+    order_line=   b'3O|1|'+sample_id.encode()+b'||'+ex_code_str+b'|R||'+time_now.encode()+b'||||N||||5||||||||||O'
+    terminator_line=b'4L|1|N'    
     str_for_checksum=b'\x02'+header_line+b'\x0d'+patient_line+b'\x0d'+order_line+ b'\x0d'+terminator_line+ b'\x0d\x03'
     checksum=self.get_checksum(str_for_checksum)
     print_to_log('Calculated checksum=: ',checksum)
     final_message=str_for_checksum+checksum+b'\x0d\x0a'
     print_to_log('Final message: ',final_message)
     return final_message
+    '''
     
+    header_line=  b'1H'+self.s1.encode()+self.s2.encode()+self.s3.encode()+self.s4.encode()+b'|||3600796||||||||LIS2-A|'+time_now.encode()
+    patient_line= b'2P|1|NOPID|||NONAME^^|||F'
+    order_line=   b'3O|1|'+sample_id.encode()+b'||'+ex_code_str+b'|R||'+time_now.encode()+b'||||N||||5||||||||||O'
+    terminator_line=b'4L|1|N'
+    return self.format_astm_message(header_line)+self.format_astm_message(patient_line)+self.format_astm_message(order_line)+self.format_astm_message(terminator_line)
+    
+  def format_astm_message(self,message):
+    message_for_checksum=b'\x02'+message+b'\x0d\x03'
+    message_checksum=self.get_checksum(message_for_checksum)
+    print_to_log('Calculated checksum=: ',message_checksum)
+    final_message=message_for_checksum+message_checksum+b'\x0d\x0a'
+    print_to_log('Final message: ',final_message)
+    return final_message
+            
   def get_checksum(self,data):
     checksum=0
     start_chk_counting=False
