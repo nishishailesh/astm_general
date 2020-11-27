@@ -4,7 +4,6 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/root/vitros/astmbi/astm_bidirectional_xl_1000.py
-
+ExecStart=/root/vitros/astmbi/astm_bidirectional_general_each_line.py
 [Install]
 WantedBy=multi-user.target

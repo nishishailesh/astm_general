@@ -14,10 +14,12 @@ class astms(astmg.astmg, file_mgmt):
 
     self.send_status=0
           #1=enq sent
-          #2=1st ack received
+          #2=1st ack received (with H)
           #3=data sent
-          #4=2nd ack received
-          #0=eot sent
+          #4=2nd ack received (with R,M etc)
+          #0=eot sent	(with L)
+    self.line_count=0
+    self.total_line_count=0
 
     self.set_inbox(conf.inbox_data,conf.inbox_arch)
     self.set_outbox(conf.outbox_data,conf.outbox_arch)
@@ -84,7 +86,7 @@ class astms(astmg.astmg, file_mgmt):
 
     elif(data==b'\x06'):            #ACK when sending
 
-      if(self.send_status==1):
+      if(self.send_status==1):	#This is post-ENQ ACK
         signal.alarm(0)
         self.send_status=2
         print_to_log('send_status=={}'.format(self.send_status),'post-ENQ ACK')
@@ -97,23 +99,35 @@ class astms(astmg.astmg, file_mgmt):
         self.get_first_outbox_file()                          #set current_outbox file
         fd=open(self.outbox_data+self.current_outbox_file,'rb')
         
-        #data must not be >1024
-        #it will be ETX data , not ETB data
-        #Frame number will always be one and only one
-        byte_data=fd.read(2024)                               
-        
-        print_to_log('File Content',byte_data)
+        #data must not be >1024 but this is multimessage file
+        #it will be ETX data , not ETB data 
+        #Frame number will be managed by sending application
+        byte_data=fd.read(1024*10)
+        #split data by LF
+        self.byte_data_array=byte_data.split('\x0a')
+        self.total_line_count=len(self.byte_data_array)
+        self.line_count=0
+        print_to_log('File Content(byte_data)',byte_data)
+        print_to_log('File Content(byte_data_array, <LF> separated array)',byte_data_array)
+        print_to_log('byte_data_array length, total_line_count',self.total_line_count)
+        print_to_log('byte_data_array current line_count',self.line_count)
+
         chksum=self.get_checksum(byte_data)
         print_to_log('CHKSUM',chksum)
-        self.write_msg=byte_data #set message
+        #send first line
+        self.write_msg=byte_data[line_count] #set message to first line
         
-        #self.send_status=3       
+        #self.send_status=3
         #data sent -> change status only when really data of stx-lf or anyother-inappropriate frame really sent
         
         #print_to_log('send_status=={}'.format(self.send_status),'changed send_status to 3 (data sent to write buffer)')
         #writing end
         signal.alarm(self.alarm_time) #wait for receipt of second ack
-        
+
+      elif(self.send_status==3 && line_count<total_line_count):
+        line_count++
+        self.write_msg=byte_data[line_count]
+
       elif(self.send_status==3):
         signal.alarm(0)
         self.send_status=4
